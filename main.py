@@ -9,6 +9,15 @@ import sys
 import time
 
 
+
+#consts
+data_dir = "data"
+ru_prefix = "http://wotblitz.ru/ru"
+links = {"common": ["Новости", "news/pc-browser/common"],
+         "maintenance": ["Технические", "news/pc-browser/maintenance"]
+         }
+         
+
 def load_helper(uri):
     if type(uri) != str:
         return uri
