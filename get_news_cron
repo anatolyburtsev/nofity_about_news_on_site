@@ -1,0 +1,2 @@
+MAILTO=anatolyburtsev@yandex.ru
+*/2		*		*		*		*		onotole		python /home/onotole/notify_about_news_on_site/main.py

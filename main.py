@@ -5,16 +5,22 @@ __author__ = 'onotole'
 from bs4 import BeautifulSoup
 import urllib2
 from socket import timeout
+from urlparse import urljoin
 import sys
+import os
+import os.path
 import time
-
 
 
 #consts
 data_dir = "data"
 ru_prefix = "http://wotblitz.ru/ru"
 links = {"common": ["Новости", "news/pc-browser/common"],
-         "maintenance": ["Технические", "news/pc-browser/maintenance"]
+         "maintenance": ["Технические", "news/pc-browser/maintenance"],
+         "media": ["Медиа", "news/pc-browser/media"],
+         "community": ["От игроков", "news/pc-browser/community"],
+         "guide": ["Руководства", "news/pc-browser/guide"],
+         "specials": ["Акции", "news/pc-browser/specials"]
          }
          
 
@@ -61,13 +67,55 @@ def get_post_text(url):
     post_text_raw = page.find("div", attrs={'class': 'b-content'})
     post_text = post_text_raw.get_text()
 
-    post = post_title + "\n\n" + post_text
+    post_pic_raw = page.find("div", attrs={'class':"news-picture"})
+    post_pic = post_pic_raw.attrs["style"].split("'")[1]
+
+    post = post_pic + "\n\n" + post_title + "\n\n" + post_text + "\n\n" + url
     return post
 
 
+def save_last_post(label, post):
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
+    with open(os.path.join(data_dir, label), 'w') as f:
+        f.write(post)
 
+
+def save_all_last_posts():
+    for label in links.keys():
+        link = urljoin(ru_prefix, links[label][1])
+        post = get_last_post(link)
+        save_last_post(label, post)
+
+
+def check_for_new_posts():
+    for label in links.keys():
+        link = urljoin(ru_prefix, links[label][1])
+        post = get_last_post(link)
+        try:
+            f = open(os.path.join(data_dir, label), "r")
+            saved_post = f.readline()
+            f.close()
+        except IOError:
+            saved_post = ""
+        if post != saved_post:
+            # Detected new post
+            notify(label, post)
+            save_last_post(label, post)
+
+
+def notify(label, post):
+    url = urljoin(ru_prefix, post)
+    post_text = get_post_text(url)
+    print(label)
+    print(post_text)
+    #print(url)
 
 
 #print(get_posts_list("http://wotblitz.ru/ru/news/pc-browser/specials"))
 #print(get_last_post("http://wotblitz.ru/ru/news/pc-browser/specials"))
-print(get_post_text("http://wotblitz.ru/ru/news/pc-browser/specials/top-destroyers/"))
+#print(get_post_text("http://wotblitz.ru/ru/news/pc-browser/specials/top-destroyers/"))
+#print(links["common"][1])
+#save_all_last_posts()
+
+check_for_new_posts()
