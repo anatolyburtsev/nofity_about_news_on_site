@@ -1,2 +1,2 @@
 MAILTO=anatolyburtsev@yandex.ru
-*/2		*		*		*		*		onotole		python /home/onotole/notify_about_news_on_site/main.py
+*/2	*	*	*	*	onotole	python ~/Yandex.Disk/coding/python/nofity_about_news_on_site/main.py

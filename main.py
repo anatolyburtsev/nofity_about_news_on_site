@@ -10,6 +10,7 @@ import sys
 import os
 import os.path
 import time
+from vk_bot import create_post
 
 
 #consts
@@ -65,7 +66,12 @@ def get_post_text(url):
     post_title = post_title_raw.attrs["content"]
 
     post_text_raw = page.find("div", attrs={'class': 'b-content'})
-    post_text = post_text_raw.get_text()
+    try:
+        post_text = post_text_raw.get_text()
+    except AttributeError:
+        print("ERROR")
+        print(post_text_raw)
+        raise
 
     post_pic_raw = page.find("div", attrs={'class':"news-picture"})
     post_pic = post_pic_raw.attrs["style"].split("'")[1]
@@ -107,8 +113,9 @@ def check_for_new_posts():
 def notify(label, post):
     url = urljoin(ru_prefix, post)
     post_text = get_post_text(url)
-    print(label)
-    print(post_text)
+    #print(label)
+    #print(post_text)
+    create_post(post_text.encode('utf-8'),label)
     #print(url)
 
 
