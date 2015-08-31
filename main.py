@@ -115,7 +115,7 @@ def notify(label, post):
     post_text = get_post_text(url)
     #print(label)
     #print(post_text)
-    create_post(post_text.encode('utf-8'),label)
+    create_post(post_text.encode('utf-8'), label)
     #print(url)
 
 
