@@ -1,5 +1,5 @@
 vk_username = "79269900495"
-vk_password = "sT2ANSbsMGnReQ3r2SvWaveGMtyz9Qj"
+vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9Qj"
 application_id = "4434173"
 
 # mine
@@ -14,4 +14,5 @@ chat_for_notification_id = 2
 group_for_post_id = 87512171
 group_for_post_id = 79514596
 group_for_post_url = "https://vk.com/wotblitzstat"
+group_for_post_url = "https://vk.com/x_community"
 delay_before_publish = 1

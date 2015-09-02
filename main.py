@@ -18,8 +18,8 @@ data_dir = "data"
 ru_prefix = "http://wotblitz.ru/ru"
 links = {"common": ["Новости", "news/pc-browser/common"],
          "maintenance": ["Технические", "news/pc-browser/maintenance"],
-         "media": ["Медиа", "news/pc-browser/media"],
-         "community": ["От игроков", "news/pc-browser/community"],
+         #"media": ["Медиа", "news/pc-browser/media"],
+         #"community": ["От игроков", "news/pc-browser/community"],
          "guide": ["Руководства", "news/pc-browser/guide"],
          "specials": ["Акции", "news/pc-browser/specials"]
          }

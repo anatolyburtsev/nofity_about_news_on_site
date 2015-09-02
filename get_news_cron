@@ -1,3 +1,3 @@
 MAILTO=anatolyburtsev@yandex.ru
-*/2	*	*	*	*	onotole	python ~/Yandex.Disk/coding/python/nofity_about_news_on_site/main.py
-30	9,13,16 * * *	onotole python ~/Yandex.Disk/coding/python/nofity_about_news_on_site/check_postponed_posts.py
+*/2	*	*	*	*	onotole	 /usr/bin/flock -w 0 /tmp/.check_news python ~/Yandex.Disk/coding/python/nofity_about_news_on_site_linux/main.py
+30	9,13,15,17 * * *	onotole python ~/Yandex.Disk/coding/python/nofity_about_news_on_site_linux/check_postponed_posts.py
