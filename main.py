@@ -3,6 +3,7 @@
 
 __author__ = 'onotole'
 from bs4 import BeautifulSoup
+from bs4 import element
 import urllib2
 from socket import timeout
 from urlparse import urljoin
@@ -11,18 +12,8 @@ import os
 import os.path
 import time
 from vk_bot import create_post
+import config
 
-
-#consts
-data_dir = "data"
-ru_prefix = "http://wotblitz.ru/ru"
-links = {"common": ["Новости", "news/pc-browser/common"],
-         "maintenance": ["Технические", "news/pc-browser/maintenance"],
-         #"media": ["Медиа", "news/pc-browser/media"],
-         #"community": ["От игроков", "news/pc-browser/community"],
-         "guide": ["Руководства", "news/pc-browser/guide"],
-         "specials": ["Акции", "news/pc-browser/specials"]
-         }
          
 
 def load_helper(uri):
@@ -81,9 +72,9 @@ def get_post_text(url):
 
 
 def save_last_post(label, post):
-    if not os.path.isdir(data_dir):
-        os.mkdir(data_dir)
-    with open(os.path.join(data_dir, label), 'w') as f:
+    if not os.path.isdir(config.data_dir):
+        os.mkdir(config.data_dir)
+    with open(os.path.join(config.data_dir, label), 'w') as f:
         f.write(post)
 
 
@@ -94,12 +85,91 @@ def save_all_last_posts():
         save_last_post(label, post)
 
 
+def get_info_for_platoon_event(url_to_post):
+    # обработка "решающего взвода" чуть сложнее
+    page = load_helper(url_to_post)
+
+    # получаем ссылку на картинку
+    post_pic_raw = page.find("div", attrs={'class': "news-picture"})
+    post_pic = post_pic_raw.attrs["style"].split("'")[1]
+
+
+    urls = page.find_all("a", attrs={'target': '_blank'})
+    for url_from_post in urls:
+        if "topic" in url_from_post.attrs["href"]:
+            url_to_post_on_forum = url_from_post.attrs["href"]
+            break
+
+
+
+    #получение title
+    post_id = url_to_post_on_forum.split('#')[-1]
+    # entry453689 -> post_id_453689
+    post_id = "post_id_"+post_id[5:]
+    page_on_forum = load_helper(url_to_post_on_forum)
+    #print(url_to_post_on_forum)
+    post_with_text = page_on_forum.find('div', attrs={'id': post_id})
+    title = post_with_text.find('p', attrs={'style': 'text-align:center;'}).get_text()
+
+    pre_table_text = ""
+    p_or_table = post_with_text.find_all(['p', 'table'])
+    for tag in p_or_table:
+        if tag.name == 'table':
+            break
+        if len(tag.attrs) == 0:
+            pre_table_text += tag.get_text()
+            pre_table_text += "\n"
+
+    table_raw = post_with_text.find('table')
+    table_text = ""
+    i = 0
+    our_clan_mates = ""
+    our_clan = load_clans_user()
+
+    for p in table_raw.find_all('p', attrs={'style': "background:none;", 'align': 'center'}):
+        if i % 5 == 0:
+            # номер игрока
+            table_text += p.get_text()
+            table_text += ". "
+        if i % 5 == 1:
+            # ник игрока
+            username = p.get_text()
+            if username in our_clan:
+                our_clan_mates += username
+                our_clan_mates += '\n'
+            table_text += username
+            table_text += " - "
+        if i % 5 == 2:
+            # количество медалей
+            table_text += p.get_text()
+            table_text += u" медалей\n"
+        i += 1
+
+    post_text = post_pic + "\n\n" + title + "\n\n" + u"Поздравляем наших соклановцев:\n" + our_clan_mates + "\n\n" +\
+                pre_table_text + "\n" + table_text + "\n\n" + u"Новость на форуме: " + url_to_post_on_forum
+    return post_text
+
+
+def load_clans_user():
+    # -> set
+    clan = set()
+    #TODO check username in API
+    line = "blah"
+    with open("clan_list.txt", "r") as f:
+        while line:
+            line = f.readline()[:-1]
+            if len(line) > 2:
+                clan.add(line)
+    return clan
+
+
+
 def check_for_new_posts():
-    for label in links.keys():
-        link = urljoin(ru_prefix, links[label][1])
+    for label in config.links.keys():
+        link = urljoin(config.ru_prefix, config.links[label][1])
         post = get_last_post(link)
         try:
-            f = open(os.path.join(data_dir, label), "r")
+            f = open(os.path.join(config.data_dir, label), "r")
             saved_post = f.readline()
             f.close()
         except IOError:
@@ -111,9 +181,11 @@ def check_for_new_posts():
 
 
 def notify(label, post):
-    url = urljoin(ru_prefix, post)
-    post_text = get_post_text(url)
-    #print(label)
+    url = urljoin(config.ru_prefix, post)
+    if not "platoon_event" in post:
+        post_text = get_post_text(url)
+    else:
+        post_text = get_info_for_platoon_event(url)
     #print(post_text)
     create_post(post_text.encode('utf-8'), label)
     #print(url)

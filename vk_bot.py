@@ -11,7 +11,7 @@ import config
 import datetime
 import calendar
 import time
-import os
+import config
 
 
 def call_api(method, params, token):
@@ -20,12 +20,12 @@ def call_api(method, params, token):
     result_raw = json.loads(urllib2.urlopen(url).read())
     try:
         result = result_raw["response"]
-    except KeyError:
+    except KeyError, e:
         if result_raw["error"]["error_code"] == 9:
             return True
         print("ERROR")
         print(result_raw)
-        raise
+        raise e
     return result
 
 
@@ -80,16 +80,14 @@ def create_post(text, label):
     group_id = config.group_for_post_id
     token_inner = token
 
-    #message_for_notify = "After " + str(delay_before_publish) + " hour will be a new post at group " + config.group_for_post_url + " in section " + label
     message_for_notify = u"Новый пост добавлен в очередь через " + str(config.delay_before_publish) +\
-                         u" час(ов) в группу " + config.group_for_post_url
+                         u" час(ов) в группу " + config.group_for_post_url + u" Рубрика " + config.links[label][0]
     message_for_notify = message_for_notify.encode('utf-8')
-
     result_creating = create_post_advanced(group_id, text, token_inner, config.delay_before_publish)
-    result_sending_to_user = send_message(config.user_for_notification_id, message_for_notify, token)
+    #result_sending_to_user = send_message(config.user_for_notification_id, message_for_notify, token)
     result_sending_to_chat = send_message_to_chat(config.chat_for_notification_id, message_for_notify, token)
 
-    result = [result_creating, result_sending_to_user, result_sending_to_chat]
+    result = [result_creating, result_sending_to_chat]
     return result
 
 
@@ -153,9 +151,23 @@ def check_postponed_posts_for_today():
     return check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token_inner)
 
 
+def get_token(username, password, application_id, scopes):
+    try:
+        with open(config.token_filename, 'r') as f:
+            user_id = f.readline()
+            token = f.readline()
+            call_api("messages.get", [("count", 1)], token)
+    except: #IOError or KeyError:
+        token, user_id = vk_auth.auth(username, password, application_id, scopes)
+        f = open(config.token_filename, 'w')
+        f.write(user_id+'\n')
+        f.write(token)
+        f.close()
+    return [user_id, token]
 
 
-token, user_id = vk_auth.auth(config.vk_username, config.vk_password, config.application_id, "messages,wall,photos")
+user_id, token = get_token(config.vk_username, config.vk_password, config.application_id, config.scopes)
+
 
 #print postponed_posts(config.group_for_post_id, token)
 #print(check_postponed_posts_for_today(config.group_for_post_id, schedule.posts_time, token))
