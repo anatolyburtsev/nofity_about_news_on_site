@@ -3,15 +3,48 @@
 
 import vk_api_auth as vk_auth
 import json
+import urllib
 import urllib2
 import requests
 import schedule
 from urllib import urlencode
 import config
 import datetime
+import logging
 import calendar
 import time
 import config
+import os
+import signal
+
+logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
+
+
+class TimeoutError(Exception):
+    def __init__(self, value="Timed Out"):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+def timeout(seconds_before_timeout):
+    def decorate(f):
+        def handler(signum, frame):
+            raise TimeoutError()
+
+        def new_f(*args, **kwargs):
+            old = signal.signal(signal.SIGALRM, handler)
+            signal.alarm(seconds_before_timeout)
+            try:
+                result = f(*args, **kwargs)
+            finally:
+                signal.signal(signal.SIGALRM, old)
+            signal.alarm(0)
+            return result
+        new_f.func_name = f.func_name
+        return new_f
+    return decorate
 
 
 def call_api(method, params, token):
@@ -23,9 +56,16 @@ def call_api(method, params, token):
     except KeyError, e:
         if result_raw["error"]["error_code"] == 9:
             return True
-        print("ERROR")
-        print(result_raw)
-        raise e
+        elif result_raw["error"]["error_code"] == 214:
+            #  a post is already scheduled for this time
+            logging.info('a post is already scheduled for this time, sleep for a 1 minute')
+            time.sleep(61)
+            call_api(method, params, token)
+        else:
+            logging.warning("error with vk api")
+            logging.warning(url)
+            logging.warning(result_raw)
+            raise e
     return result
 
 
@@ -39,18 +79,10 @@ def call_api_post(method, params, token, timeout=5):
     except KeyError:
         if result_raw["error"]["error_code"] == 9:
             return True
-        print("ERROR")
-        print(result_raw)
+        logging.info("error with vk api")
+        logging.info(result_raw)
         raise
     return result
-
-
-def get_messages(user_id, token):
-    return call_api("messages.getDialogs", [("uid", user_id)], token)
-
-
-# def send_message_to_conversation(user_id, token, text):
-#     return call_api("messages.send", [("uid", user_id), ("chat_id", str(conversation_id)), ("message", text)], token)
 
 
 def send_message(user_id, text, token_inner=None):
@@ -65,50 +97,97 @@ def send_message_to_chat(chat_id, text, token_inner=None):
     return call_api("messages.send", [("chat_id", str(chat_id)), ("message", text)], token_inner)
 
 
-def create_post_advanced(group_id, text, token, delay_hours=0):
+def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0):
     if type(group_id) != str and group_id > 0:
         group_id_signed = "-"+str(group_id)
     else:
         group_id_signed = group_id
     future = datetime.datetime.utcnow() + datetime.timedelta(hours=delay_hours)
     publish_date = calendar.timegm(future.timetuple())
-    return call_api_post("wall.post", [("signed", 1), ("owner_id", group_id_signed), ("message", text),
-                                       ("publish_date", publish_date)], token)
+    attachments = ""
+    for pic_url in pictures_urls:
+        pic_id = upload_picture_to_group_by_url(group_id, pic_url, token)
+        if pic_id:
+            attachments += pic_id
+            attachments += ","
+    attachments = attachments[:-1]
+
+    if config.debug_mode:
+        return 0
+    else:
+        return call_api_post("wall.post", [("signed", 1),
+                                           ("owner_id", group_id_signed),
+                                           ("message", text),
+                                           ("publish_date", publish_date),
+                                           ("attachments", attachments)], token)
 
 
-def create_post(text, label):
+def create_post(text, label, pictures_urls=[]):
     group_id = config.group_for_post_id
     token_inner = token
 
-    message_for_notify = u"Новый пост добавлен в очередь через " + str(config.delay_before_publish) +\
-                         u" час(ов) в группу " + config.group_for_post_url + u" Рубрика " + config.links[label][0]
-    message_for_notify = message_for_notify.encode('utf-8')
-    result_creating = create_post_advanced(group_id, text, token_inner, config.delay_before_publish)
-    #result_sending_to_user = send_message(config.user_for_notification_id, message_for_notify, token)
-    result_sending_to_chat = send_message_to_chat(config.chat_for_notification_id, message_for_notify, token)
+    # message_for_notify = u"пост будет через " + str(config.delay_before_publish) +\
+    #                      u" час в группе " + config.group_for_post_url +
 
-    result = [result_creating, result_sending_to_chat]
+    result_creating = create_post_advanced(group_id, text, token_inner, pictures_urls, config.delay_before_publish)
+    if config.debug_mode:
+        post_id = 1
+    else:
+        post_id = result_creating["post_id"]
+    message_for_notify = u"Новый пост: https://vk.com/wall-" + str(config.group_for_post_id) + "_" + \
+                         str(post_id) + u". Рубрика " + config.links[label][0]
+    message_for_notify = message_for_notify.encode('utf-8')
+    if not config.debug_mode:
+        result_sending_to_chat = send_message_to_chat(config.chat_for_notification_id, message_for_notify, token)
+        result = [result_creating, result_sending_to_chat]
+    else:
+        print("Message to chat:" + message_for_notify)
+        #print("post text: \n" + text)
+        result = 0
     return result
 
 
-def upload_picture_to_group(group_id, token):
+def save_picture_by_url_to_hdd(picture_url):
+    logging.debug("saving picture by url: " + picture_url)
+    picture_filename = picture_url.split('/')[-1]
+    if not os.path.isdir(config.pic_dir):
+        os.mkdir(config.pic_dir)
+    picture_path = os.path.join(config.pic_dir, picture_filename)
+    urllib.urlretrieve(picture_url, picture_path)
+    return picture_path
+
+
+def upload_picture_to_group_by_url(group_id, picture_url, token):
+    picture_path = save_picture_by_url_to_hdd(picture_url)
+    return upload_picture_to_group_from_hdd(group_id, picture_path, token)
+
+
+def upload_picture_to_group_from_hdd(group_id, picture_path, token, force=False):
+    # picture_description = "blah"
+    statinfo = os.stat(picture_path)
+    if not force and statinfo.st_size < config.small_picture_limit:
+        return False
     if int(group_id) < 0:
         group_id = str(-int(group_id))
     answer = call_api("photos.getWallUploadServer", [("group_id", group_id)], token)
-    #answer = call_api("photos.getWallUploadServer", [("user_id", config.user_for_notification_id)], token)
+
     album_id = answer["aid"]
     upload_url = answer["upload_url"]
-    print upload_url
-    files = {'file': open('pic2.png', 'rb')}
+    files = {'file': open(picture_path, 'rb')}
     r = requests.post(upload_url, files=files)
-    print r.json()
-    photo_id = json.loads(r.json()["photo"])[0]["photo"]
+
+    photo_id = r.json()["photo"]
     photo_hash = r.json()["hash"]
     photo_server = r.json()["server"]
-
-    result_uploading_photo = call_api("photos.saveWallPhoto", [("group_id", config.group_for_post_id), ("photo", photo_id), ("server", photo_server),
-                                      ("hash", photo_hash)], token)
-    print result_uploading_photo
+    result_uploading_photo = call_api("photos.saveWallPhoto", [("group_id", config.group_for_post_id),
+                                                               ("photo", photo_id),
+                                                               ("server", photo_server),
+                                                               ("hash", photo_hash)], token)
+    # print(result_uploading_photo)
+    # call_api("photos.edit", [("owner_id", -int(group_id)),
+    #                          ("photo_id", result_uploading_photo[0]["pid"]),
+    #                          ("caption", picture_description)], token)
+    return result_uploading_photo[0]["id"]
 
 
 def postponed_posts(group_id, token):
@@ -151,6 +230,7 @@ def check_postponed_posts_for_today():
     return check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token_inner)
 
 
+@timeout(5*60)
 def get_token(username, password, application_id, scopes):
     try:
         with open(config.token_filename, 'r') as f:
@@ -158,22 +238,29 @@ def get_token(username, password, application_id, scopes):
             token = f.readline()
             call_api("messages.get", [("count", 1)], token)
     except: #IOError or KeyError:
+        logging.info("token for vk is outdated, start getting new")
         token, user_id = vk_auth.auth(username, password, application_id, scopes)
+        logging.info("got new token for vk")
         f = open(config.token_filename, 'w')
         f.write(user_id+'\n')
         f.write(token)
         f.close()
     return [user_id, token]
 
+logging.debug("Start checking token for vk")
+start_time = time.time()
 
 user_id, token = get_token(config.vk_username, config.vk_password, config.application_id, config.scopes)
 
+elapsed = time.time() - start_time
+logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
 
+#upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)
 #print postponed_posts(config.group_for_post_id, token)
 #print(check_postponed_posts_for_today(config.group_for_post_id, schedule.posts_time, token))
 #print time.gmtime()
 
-#! upload_picture_to_group(config.group_for_post_id, token)
+#upload_picture_to_group(config.group_for_post_id, token)
 #send_message_to_chat(config.conversation_for_notification_id, "Hello from bot", token)
 #messages = get_messages(user_id, token)
 #send_message_to_conversation(user_id, token, "hello, world!")

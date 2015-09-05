@@ -13,8 +13,10 @@ import os.path
 import time
 from vk_bot import create_post
 import config
+import logging
 
-         
+logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
+
 
 def load_helper(uri):
     if type(uri) != str:
@@ -55,20 +57,34 @@ def get_post_text(url):
     page = load_helper(url)
     post_title_raw = page.find("meta", attrs={'property': 'og:title'})
     post_title = post_title_raw.attrs["content"]
-
     post_text_raw = page.find("div", attrs={'class': 'b-content'})
+    post_text_raw = str(post_text_raw).replace("<li>", config.li_replaces).replace("</li>", "")
+
+    post_text_raw = post_text_raw.replace('<img alt="" dir="false" height="22" src="http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/x3.png" style="vertical-align: middle;" width="22"/>', "X3: ")
+    post_text_raw = post_text_raw.replace('<img alt="" dir="false" height="22" src="http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/x5.png" style="vertical-align: middle;" width="22"/>', "X5: ")
+    post_text_raw = post_text_raw.replace('<img alt="" dir="false" height="25" src="http://static-wbp-ru.gcdn.co/dcont/1.8/fb/image/tank_discount.png" style="vertical-align: middle;" width="25"/>', "SALE:")
+    post_text_raw = BeautifulSoup(post_text_raw)
+    pictures_urls = []
+    for i in post_text_raw.find_all("img"):
+
+        url_to_pic = i.attrs["src"]
+        if "static-wbp" in url_to_pic:
+            if "http" not in url_to_pic:
+                url_to_pic = urljoin("http:", url_to_pic)
+            pictures_urls.append(url_to_pic)
     try:
         post_text = post_text_raw.get_text()
     except AttributeError:
-        print("ERROR")
-        print(post_text_raw)
+        logging.error("ERROR")
+        logging.error(post_text_raw)
         raise
 
-    post_pic_raw = page.find("div", attrs={'class':"news-picture"})
+    post_pic_raw = page.find("div", attrs={'class': "news-picture"})
     post_pic = post_pic_raw.attrs["style"].split("'")[1]
+    pictures_urls.append(post_pic)
 
-    post = post_pic + "\n\n" + post_title + "\n\n" + post_text + "\n\n" + url
-    return post
+    post = post_title + "\n\n" + post_text + "\n\n" + url
+    return [post, pictures_urls]
 
 
 def save_last_post(label, post):
@@ -79,8 +95,8 @@ def save_last_post(label, post):
 
 
 def save_all_last_posts():
-    for label in links.keys():
-        link = urljoin(ru_prefix, links[label][1])
+    for label in config.links.keys():
+        link = urljoin(config.ru_prefix, config.links[label][1])
         post = get_last_post(link)
         save_last_post(label, post)
 
@@ -91,16 +107,13 @@ def get_info_for_platoon_event(url_to_post):
 
     # получаем ссылку на картинку
     post_pic_raw = page.find("div", attrs={'class': "news-picture"})
-    post_pic = post_pic_raw.attrs["style"].split("'")[1]
-
+    post_pic = [post_pic_raw.attrs["style"].split("'")[1]]
 
     urls = page.find_all("a", attrs={'target': '_blank'})
     for url_from_post in urls:
         if "topic" in url_from_post.attrs["href"]:
             url_to_post_on_forum = url_from_post.attrs["href"]
             break
-
-
 
     #получение title
     post_id = url_to_post_on_forum.split('#')[-1]
@@ -145,9 +158,9 @@ def get_info_for_platoon_event(url_to_post):
             table_text += u" медалей\n"
         i += 1
 
-    post_text = post_pic + "\n\n" + title + "\n\n" + u"Поздравляем наших соклановцев:\n" + our_clan_mates + "\n\n" +\
+    post_text =  title + "\n\n" + u"Поздравляем наших соклановцев:\n" + our_clan_mates + "\n\n" +\
                 pre_table_text + "\n" + table_text + "\n\n" + u"Новость на форуме: " + url_to_post_on_forum
-    return post_text
+    return [post_text, post_pic]
 
 
 def load_clans_user():
@@ -163,7 +176,6 @@ def load_clans_user():
     return clan
 
 
-
 def check_for_new_posts():
     for label in config.links.keys():
         link = urljoin(config.ru_prefix, config.links[label][1])
@@ -175,19 +187,22 @@ def check_for_new_posts():
         except IOError:
             saved_post = ""
         if post != saved_post:
+            logging.info("new post for vk, url=" + post)
             # Detected new post
             notify(label, post)
-            save_last_post(label, post)
+            if not config.debug_mode:
+                save_last_post(label, post)
 
 
 def notify(label, post):
     url = urljoin(config.ru_prefix, post)
-    if not "platoon_event" in post:
-        post_text = get_post_text(url)
+    if "platoon_event" not in post:
+        post_text, pictures_urls = get_post_text(url)
     else:
-        post_text = get_info_for_platoon_event(url)
+        post_text, pictures_urls = get_info_for_platoon_event(url)
     #print(post_text)
-    create_post(post_text.encode('utf-8'), label)
+    assert type(pictures_urls) == list
+    create_post(post_text.encode('utf-8'), label, pictures_urls)
     #print(url)
 
 
@@ -197,4 +212,10 @@ def notify(label, post):
 #print(links["common"][1])
 #save_all_last_posts()
 
-check_for_new_posts()
+logging.debug("Start")
+start_time = time.time()
+try:
+    check_for_new_posts()
+finally:
+    elapsed = time.time() - start_time
+    logging.debug("Finish in " + str(elapsed) + " seconds")
