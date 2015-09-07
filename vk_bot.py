@@ -16,9 +16,16 @@ import time
 import config
 import os
 import signal
+from pprint import pprint
 
 logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
 
+class MessageException(Exception):
+    def __init__(self, value="Error in message"):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 class TimeoutError(Exception):
     def __init__(self, value="Timed Out"):
@@ -217,17 +224,109 @@ def check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token):
 
     for param_for_post in dict_of_posts.items():
         date_for_post = convert_today_hour_in_timestamp(param_for_post[0])
-        if date_for_post not in existing_posts and date_for_post > now_timestamp:
-            posts_to_create.append(param_for_post)
-
+        for delay_before_remind in config.time_before_remind:
+            # time has come or not?
+            if date_for_post - (now_timestamp + delay_before_remind*60) < 30:
+                if date_for_post not in existing_posts and date_for_post > now_timestamp:
+                    posts_to_create.append(param_for_post)
     return posts_to_create
 
 
 def check_postponed_posts_for_today():
     group_id = config.group_for_post_id
-    dict_of_posts = schedule.posts_time
+    dict_of_posts = get_schedule()
     token_inner = token
-    return check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token_inner)
+    missing_posts = check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token_inner)
+    return missing_posts
+
+
+#speach part
+def get_unread_messages(token, chat_id=config.chat_for_notification_id, ):
+    all_messages_list = call_api("messages.get", [("count", "50")], token)
+    messages = []
+    for message_raw in all_messages_list[1:]:
+        if message_raw["chat_id"] == chat_id and message_raw["read_state"] == 0:
+            messages.append(message_raw)
+
+    # if len(messages) > 0:
+    #     call_api("messages.markAsRead", [("message_ids", messages[0]["mid"])], token)
+    return messages
+
+
+def analyze_message(message_raw, token):
+    message = message_raw["body"].split(" ")
+    if message[0].lower() != u'бот':
+        return True
+    elif len(message) < 2 or message[1].lower() != u'расписание':
+        raise MessageException
+
+    elif len(message) > 4 and message[2].lower() == u'установить' and len(message[3]) > 3 and message[4] and message[5]:
+        # бот расписание установить 10:00 Ник рубрика
+        hours, minutes = message[3].split(':')
+        try:
+            hours = int(hours)
+            minutes = int(minutes)
+        except ValueError:
+            raise MessageException
+        current_schedule = get_schedule()
+        chapter = ""
+        for i in message[5:]:
+            chapter = chapter + i + " "
+        current_schedule[message[3]] = [message[4], chapter]
+        save_schedule(current_schedule)
+        message_to_chat = show_schedule(get_schedule())
+    elif len(message) > 2 and message[2].lower() == u'показать':
+        message_to_chat = show_schedule(get_schedule())
+    elif len(message) > 2 and message[2].lower() == u'очистить':
+        save_schedule({})
+        message_to_chat = u'да, мой повелитель'.encode('utf-8')
+    else:
+        raise MessageException
+
+    send_message_to_chat(message_raw["chat_id"], message_to_chat, token)
+
+
+def check_messages():
+    for message in get_unread_messages(token):
+        try:
+            analyze_message(message, token)
+        except MessageException:
+            message_to_chat = u"я могу показать расписание:\n" \
+                              u" бот расписание показать \n\n" \
+                              u"и установить нового ответственного:\n" \
+                              u" бот расписание установить 10:00 Имя Рубрика".encode('utf-8')
+
+            send_message_to_chat(message["chat_id"], message_to_chat, token)
+
+
+def show_schedule(schedule_dict):
+    # {"10:00" : [ник, рубрика]}
+    times_list = sorted(schedule_dict.keys())
+    output_message = u"Текущее расписание: \n"
+    #for times, param in schedule_dict.items():
+    for times in times_list:
+        param = schedule_dict[times]
+        output_message = output_message + times + u" - товарищ: " + param[0] + \
+                         u", рубрика: " + unicode(param[1]) + "\n"
+    output_message = output_message.encode('utf-8')
+    return output_message
+
+
+def get_schedule(filename="schedule.json"):
+    try:
+        with open(filename) as data_file:
+            data = json.load(data_file)
+    except IOError:
+        return {}
+    return data
+
+
+def save_schedule(schedule_dict, filename="schedule.json"):
+    assert type(schedule_dict) == dict
+    with open(filename, 'w') as outfile:
+        json.dump(schedule_dict, outfile)
+
+
 
 
 @timeout(5*60)
@@ -246,7 +345,7 @@ def get_token(username, password, application_id, scopes):
         f.write(token)
         f.close()
     return [user_id, token]
-
+#
 logging.debug("Start checking token for vk")
 start_time = time.time()
 
@@ -254,6 +353,7 @@ user_id, token = get_token(config.vk_username, config.vk_password, config.applic
 
 elapsed = time.time() - start_time
 logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
+
 
 #upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)
 #print postponed_posts(config.group_for_post_id, token)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 debug_mode = False
-testing_mode = True
+testing_mode = False
 
 # vk
 vk_username = "79269900495"
@@ -28,6 +28,8 @@ small_picture_limit = 50000
 
 
 delay_before_publish = 1
+# за сколько времени напоминать
+time_before_remind = [120, 30]
 
 scopes = "messages,wall,photos"
 li_replaces = "*** "

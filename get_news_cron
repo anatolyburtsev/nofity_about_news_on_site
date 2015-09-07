@@ -1,3 +1,9 @@
 MAILTO=anatolyburtsev@yandex.ru
-*/2	*	*	*	*	onotole	 /usr/bin/flock -w 0 /tmp/.check_news python ~/Yandex.Disk/coding/python/nofity_about_news_on_site_linux/main.py
-30	9,13,15,17 * * *	onotole python ~/Yandex.Disk/coding/python/nofity_about_news_on_site_linux/check_postponed_posts.py
+path="/home/onotole/nofity_about_news_on_site"
+*/2	*	*	*	*	onotole	 cd $path; /usr/bin/flock -w 0 /tmp/.check_news python main.py
+* *   *   *   *	onotole cd $path; /usr/bin/flock -w 0 /tmp/.check_postponed_posts python check_postponed_posts.py
+*   *   *   *   *   onotole cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*   *   *   *   *   onotole sleep 15; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*   *   *   *   *   onotole sleep 30; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*   *   *   *   *   onotole sleep 45; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+
