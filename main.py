@@ -18,6 +18,14 @@ import logging
 logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
 
 
+class WebSiteUnavailableException(Exception):
+    def __init__(self, value="problem with wotblitz.ru"):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 def load_helper(uri):
     if type(uri) != str:
         return uri
@@ -50,6 +58,8 @@ def get_posts_list(url):
 def get_last_post(url):
     page = load_helper(url)
     post = page.find("a", attrs={'class': 'news-list_link'})
+    if not post:
+        raise WebSiteUnavailableException
     return post.attrs["href"]
 
 
@@ -216,6 +226,8 @@ logging.debug("Start")
 start_time = time.time()
 try:
     check_for_new_posts()
+except WebSiteUnavailableException:
+    logging.debug("wotblitz site unavailable")
 finally:
     elapsed = time.time() - start_time
     logging.debug("Finish in " + str(elapsed) + " seconds")

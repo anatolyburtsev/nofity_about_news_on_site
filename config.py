@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 import logging
 debug_mode = False
-testing_mode = True
+testing_mode = False
 
 # vk
 vk_username = "79269900495"
-vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ"
+vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ2"
 application_id = "4434173"
 
 # mine
@@ -26,8 +26,9 @@ else:
 # картинки меньшего размера в байтах не будут загружаться в группу
 small_picture_limit = 50000
 
-
 delay_before_publish = 1
+# за сколько времени напоминать
+time_before_remind = [120, 30]
 
 scopes = "messages,wall,photos"
 li_replaces = "*** "
@@ -48,6 +49,7 @@ links = {"common": ["Новости".decode('utf-8'), "news/pc-browser/common"],
 
 
 # System
+bot_name = u'валера'.encode('utf-8')
 data_dir = "data"
 pic_dir = "pictures"
 token_filename = ".token"
