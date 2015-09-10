@@ -1,5 +1,5 @@
 __author__ = 'onotole'
-from vk_bot import check_messages
+from messages import check_messages
 import logging
 import config
 

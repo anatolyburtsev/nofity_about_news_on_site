@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 debug_mode = False
-testing_mode = False
+testing_mode = True
 
 # vk
 vk_username = "79269900495"
@@ -52,7 +52,9 @@ links = {"common": ["Новости".decode('utf-8'), "news/pc-browser/common"],
 bot_name = u'валера'.encode('utf-8')
 data_dir = "data"
 pic_dir = "pictures"
+humor_pics_dir = "/home/onotole/Yandex.Disk/humordirs/humor/"
 token_filename = ".token"
 logging_format = u'%(filename)s[line:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s'
 logging_level = logging.DEBUG
 logging_filename = u"notifier.log"
+

@@ -349,3 +349,4 @@ logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
 #messages = get_messages(user_id, token)
 #send_message_to_conversation(user_id, token, "hello, world!")
 #create_post("PEWPEW")
+

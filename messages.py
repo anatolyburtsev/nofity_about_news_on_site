@@ -74,8 +74,8 @@ def get_unread_messages(token, chat_id=config.chat_for_notification_id, ):
         if "chat_id" in message_raw and message_raw["chat_id"] == chat_id and message_raw["read_state"] == 0:
             messages.append(message_raw)
 
-    # if len(messages) > 0:
-    #     call_api("messages.markAsRead", [("message_ids", messages[0]["mid"])], token)
+    if not config.testing_mode and len(messages) > 0:
+         call_api("messages.markAsRead", [("message_ids", messages[0]["mid"])], token)
     return messages
 
 

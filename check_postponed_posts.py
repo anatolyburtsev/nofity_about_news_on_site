@@ -22,3 +22,4 @@ for missing_post in check_postponed_posts_for_today():
               + u' Рубрика: ' \
               + missing_post_info[1]
     send_message_to_chat(config.chat_for_notification_id, message.encode('utf-8'))
+
