@@ -16,6 +16,7 @@ import time
 import config
 import os
 import signal
+import random
 from pprint import pprint
 
 logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
@@ -103,9 +104,22 @@ def send_message(user_id, text, token_inner=None):
 
 
 def send_message_to_chat(chat_id, text, token_inner=None):
+    if text == "":
+        return True
     if not token_inner:
         token_inner = token
     return call_api("messages.send", [("chat_id", str(chat_id)), ("message", text)], token_inner)
+
+
+def send_picture_to_chat_from_hdd(chat_id, picture_path, token_inner=None):
+    chat_id = abs(int(chat_id))
+    photo_id = upload_picture_to_chat_from_hdd(picture_path)
+    return call_api("messages.send", [("chat_id", str(chat_id)), ("attachment", photo_id)], token_inner)
+
+
+def send_random_picture_to_chat_from_dir(chat_id, path_to_dir, token_inner=None):
+    photo_path = choose_random_humor_from_hdd(config.humor_pics_dir)
+    return send_picture_to_chat_from_hdd(chat_id, photo_path, token_inner)
 
 
 def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0):
@@ -201,6 +215,33 @@ def upload_picture_to_group_from_hdd(group_id, picture_path, token, force=False)
     return result_uploading_photo[0]["id"]
 
 
+def upload_picture_to_chat_from_hdd(picture_path):
+    try:
+        picture_path = picture_path.encode('utf-8')
+    except UnicodeDecodeError:
+        pass
+    # picture_description = "blah"
+    answer = call_api("photos.getMessagesUploadServer", [], token)
+    album_id = answer["aid"]
+    upload_url = answer["upload_url"]
+    files = {'file': open(picture_path, 'rb')}
+    r = requests.post(upload_url, files=files)
+
+    photo_id = r.json()["photo"]
+    photo_hash = r.json()["hash"]
+    photo_server = r.json()["server"]
+
+    result_uploading_photo = call_api("photos.saveMessagesPhoto", [("photo", photo_id),
+                                                               ("server", photo_server),
+                                                               ("hash", photo_hash)], token)
+    return result_uploading_photo[0]["id"]
+
+
+def choose_random_humor_from_hdd(path_to_dir):
+    files = os.listdir(path_to_dir)
+    return os.path.join(path_to_dir, files[random.randrange(len(files))])
+
+
 def postponed_posts(group_id, token):
     postponed_posts_times = []
     if int(group_id) > 0:
@@ -244,77 +285,6 @@ def check_postponed_posts_for_today():
     return missing_posts
 
 
-#speach part
-def get_unread_messages(token, chat_id=config.chat_for_notification_id, ):
-    all_messages_list = call_api("messages.get", [("count", "20")], token)
-    messages = []
-    for message_raw in all_messages_list[1:]:
-        if "chat_id" in message_raw and message_raw["chat_id"] == chat_id and message_raw["read_state"] == 0:
-            messages.append(message_raw)
-
-    # if len(messages) > 0:
-    #     call_api("messages.markAsRead", [("message_ids", messages[0]["mid"])], token)
-    return messages
-
-
-def analyze_message(message_raw, token):
-    message = message_raw["body"].split(" ")
-    message_line = message_raw["body"]
-    if message[0].lower().encode('utf-8') != config.bot_name:
-        return True
-    elif len(message) > 2 and u'ты' in message_line.lower() and u'где' in message_line.lower():
-        message_to_chat = u'Валеры здесь нет!'.encode('utf-8')
-
-    elif len(message) < 2 or message[1].lower() != u'расписание':
-        raise MessageException
-
-    elif len(message) > 4 and message[2].lower() == u'установить' and len(message[3]) > 3 and message[4] and message[5]:
-        # бот расписание установить 10:00 Ник рубрика
-        hours, minutes = message[3].split(':')
-        try:
-            hours = int(hours)
-            minutes = int(minutes)
-        except ValueError:
-            raise MessageException
-        current_schedule = get_schedule()
-        chapter = ""
-        for i in message[5:]:
-            chapter = chapter + i + " "
-        current_schedule[message[3]] = [message[4], chapter]
-        save_schedule(current_schedule)
-        message_to_chat = show_schedule(get_schedule())
-    elif len(message) > 2 and message[2].lower() == u'показать':
-        message_to_chat = show_schedule(get_schedule())
-    elif len(message) > 2 and message[2].lower() == u'очистить':
-        save_schedule({})
-        message_to_chat = u'да, мой повелитель'.encode('utf-8')
-    else:
-        raise MessageException
-    # try:
-    #     message_to_chat = message_to_chat.encode('utf-8')
-    # except UnicodeDecodeError:
-    #     print(message_to_chat)
-    #     raise
-    send_message_to_chat(message_raw["chat_id"], message_to_chat, token)
-
-
-def check_messages():
-    for message in get_unread_messages(token):
-        try:
-            analyze_message(message, token)
-        except MessageException:
-            message_to_chat = u"я могу показать расписание:\n" +\
-                              config.bot_name.decode('utf-8') + u" расписание показать \n\n" \
-                              u"и установить нового ответственного:\n" +\
-                              config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика"
-            if "chat_id" in message:
-                message_to_chat = message_to_chat.encode('utf-8')
-                send_message_to_chat(message["chat_id"], message_to_chat, token)
-            else:
-                #message from people, not from chat
-                pass
-
-
 def show_schedule(schedule_dict):
     # {"10:00" : [ник, рубрика]}
     times_list = sorted(schedule_dict.keys())
@@ -324,7 +294,7 @@ def show_schedule(schedule_dict):
         param = schedule_dict[times]
         output_message = output_message + times + u" - товарищ: " + param[0] + \
                          u", рубрика: " + unicode(param[1]) + "\n"
-    output_message = output_message.encode('utf-8')
+    #output_message = output_message.encode('utf-8')
     return output_message
 
 
@@ -341,7 +311,6 @@ def save_schedule(schedule_dict, filename="schedule.json"):
     assert type(schedule_dict) == dict
     with open(filename, 'w') as outfile:
         json.dump(schedule_dict, outfile)
-
 
 
 
@@ -362,14 +331,13 @@ def get_token(username, password, application_id, scopes):
         f.close()
     return [user_id, token]
 #
-logging.debug("Start checking token for vk")
+#logging.debug("Start checking token for vk")
 start_time = time.time()
 
 user_id, token = get_token(config.vk_username, config.vk_password, config.application_id, config.scopes)
 
 elapsed = time.time() - start_time
 logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
-
 
 #upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)
 #print postponed_posts(config.group_for_post_id, token)
