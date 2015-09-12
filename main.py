@@ -73,7 +73,7 @@ def get_post_text(url):
     post_text_raw = post_text_raw.replace('<img alt="" dir="false" height="22" src="http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/x3.png" style="vertical-align: middle;" width="22"/>', "X3: ")
     post_text_raw = post_text_raw.replace('<img alt="" dir="false" height="22" src="http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/x5.png" style="vertical-align: middle;" width="22"/>', "X5: ")
     post_text_raw = post_text_raw.replace('<img alt="" dir="false" height="25" src="http://static-wbp-ru.gcdn.co/dcont/1.8/fb/image/tank_discount.png" style="vertical-align: middle;" width="25"/>', "SALE:")
-    post_text_raw = BeautifulSoup(post_text_raw)
+    post_text_raw = BeautifulSoup(post_text_raw, 'lxml')
     pictures_urls = []
     for i in post_text_raw.find_all("img"):
 
