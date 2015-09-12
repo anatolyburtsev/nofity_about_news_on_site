@@ -86,7 +86,7 @@ def call_api(method, params, token):
     return result
 
 
-def call_api_post(method, params, token, timeout=5):
+def call_api_post(method, params, token, timeout_between_posts=5):
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s" % (method)
     params = urlencode(params)
@@ -100,7 +100,7 @@ def call_api_post(method, params, token, timeout=5):
             # a post is already scheduled for this time
             logging.info('a post is already scheduled for this time, sleep for a 1 minute')
             time.sleep(61)
-            call_api(method, params, token)
+            call_api_post(method, params, token, timeout_between_posts)
         logging.info("error with vk api")
         logging.info(result_raw)
         raise
