@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 debug_mode = False
-testing_mode = True
+testing_mode = False
 
 # vk
 vk_username = "79269900495"
