@@ -202,6 +202,7 @@ def check_for_new_posts():
             notify(label, post)
             if not config.debug_mode:
                 save_last_post(label, post)
+            #return True
 
 
 def notify(label, post):

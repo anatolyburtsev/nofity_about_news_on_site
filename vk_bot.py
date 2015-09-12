@@ -81,6 +81,7 @@ def call_api(method, params, token):
         # Too many requests per second
         elif result_raw["error"]["error_code"] == 6:
             time.sleep(1)
+            logging.debug("Too many requests per second")
             return call_api(method, params_initial, token)
         else:
             print(result_raw["error"]["error_msg"])
@@ -92,6 +93,7 @@ def call_api(method, params, token):
 
 
 def call_api_post(method, params, token, timeout=5):
+    params_initial = params
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s" % (method)
     params = urlencode(params)
@@ -103,10 +105,20 @@ def call_api_post(method, params, token, timeout=5):
     try:
         result = result_raw["response"]
     except KeyError:
+        print result_raw["error"]["error_msg"]
         if result_raw["error"]["error_code"] == 9:
             return True
+
+        elif result_raw["error"]["error_code"] == 6:
+            time.sleep(1)
+            logging.debug("Too many requests per second")
+            return call_api_post(method, params_initial, token, timeout)
+
         elif result_raw["error"]["error_code"] == 214:
+            logging.debug("post already exist for this time")
+            #time.sleep(60)
             return False
+
         logging.info("error with vk api")
         logging.info(result_raw)
         raise
@@ -143,8 +155,12 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0,
         group_id_signed = "-"+str(group_id)
     else:
         group_id_signed = group_id
-    future = datetime.datetime.utcnow() + datetime.timedelta(hours=delay_hours,minutes=delay_minutes)
+    future = datetime.datetime.utcnow()
     publish_date = calendar.timegm(future.timetuple())
+    print("publish_date before" + str(publish_date))
+    publish_date += delay_hours * 3600 + delay_minutes * 60
+    print("publish_date after" + str(publish_date))
+    print ("delay_minutes:" + str(delay_minutes))
     attachments = ""
     for pic_url in pictures_urls:
         pic_id = upload_picture_to_group_by_url(group_id, pic_url, token)
@@ -163,7 +179,7 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0,
                                            ("attachments", attachments)], token)
         if not result:
             # if post for this time already exist, post after 2 minutes
-            result = create_post_advanced(group_id, text, token, pictures_urls, delay_hours, 2)
+            result = create_post_advanced(group_id, text, token, pictures_urls, delay_hours, random.randrange(150))
         return result
 
 
@@ -333,7 +349,6 @@ def save_schedule(schedule_dict, filename="schedule.json"):
         json.dump(schedule_dict, outfile)
 
 
-
 @timeout(5*60)
 def get_token(username, password, application_id, scopes):
     try:
@@ -350,7 +365,8 @@ def get_token(username, password, application_id, scopes):
         f.write(token)
         f.close()
     return [user_id, token]
-#
+
+
 #logging.debug("Start checking token for vk")
 start_time = time.time()
 
