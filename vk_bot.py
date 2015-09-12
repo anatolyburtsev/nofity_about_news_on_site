@@ -87,7 +87,6 @@ def call_api(method, params, token):
 
 
 def call_api_post(method, params, token, timeout=5):
-    params_initial = params
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s" % (method)
     params = urlencode(params)
@@ -102,10 +101,7 @@ def call_api_post(method, params, token, timeout=5):
         if result_raw["error"]["error_code"] == 9:
             return True
         elif result_raw["error"]["error_code"] == 214:
-            # a post is already scheduled for this time
-            logging.info('a post is already scheduled for this time, sleep for a 1 minute')
-            time.sleep(61)
-            call_api_post(method, params_initial, token, timeout)
+            return False
         logging.info("error with vk api")
         logging.info(result_raw)
         raise
@@ -155,11 +151,15 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0)
     if config.debug_mode:
         return 0
     else:
-        return call_api_post("wall.post", [("signed", 1),
+        result = call_api_post("wall.post", [("signed", 1),
                                            ("owner_id", group_id_signed),
                                            ("message", text),
                                            ("publish_date", publish_date),
                                            ("attachments", attachments)], token)
+        if not result:
+            time.sleep(61)
+            create_post_advanced(group_id, text, token, pictures_urls, delay_hours)
+        return result
 
 
 def create_post(text, label, pictures_urls=[]):
