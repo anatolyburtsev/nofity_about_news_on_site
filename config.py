@@ -4,6 +4,8 @@ import logging
 debug_mode = False
 testing_mode = False
 
+assert testing_mode >= debug_mode
+
 # vk
 vk_username = "79269900495"
 vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ2"
