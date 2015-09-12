@@ -28,6 +28,15 @@ class MessageException(Exception):
     def __str__(self):
         return repr(self.value)
 
+
+class APIErrorException(Exception):
+    def __init__(self, value="Error in message"):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class TimeoutError(Exception):
     def __init__(self, value="Timed Out"):
         self.value = value
@@ -63,22 +72,17 @@ def call_api(method, params, token):
     except urllib2.URLError:
         logging.error('couldnt load site ' + url)
         raise
-    try:
+    if "response" in result_raw.keys():
         result = result_raw["response"]
-    except KeyError, e:
+    elif "error" in result_raw.keys():
         if result_raw["error"]["error_code"] == 9:
             return True
-        elif str(result_raw["error"]["error_code"]) == '214':
-            #  a post is already scheduled for this time
-            logging.info('a post is already scheduled for this time, sleep for a 1 minute')
-            time.sleep(61)
-            call_api(method, params, token)
         else:
             print(result_raw["error"]["error_msg"])
             logging.warning("error with vk api")
             logging.warning(url)
             logging.warning(result_raw)
-            raise e
+            raise APIErrorException
     return result
 
 
@@ -92,6 +96,11 @@ def call_api_post(method, params, token, timeout=5):
     except KeyError:
         if result_raw["error"]["error_code"] == 9:
             return True
+        elif result_raw["error"]["error_code"] == 214:
+            # a post is already scheduled for this time
+            logging.info('a post is already scheduled for this time, sleep for a 1 minute')
+            time.sleep(61)
+            call_api(method, params, token)
         logging.info("error with vk api")
         logging.info(result_raw)
         raise
