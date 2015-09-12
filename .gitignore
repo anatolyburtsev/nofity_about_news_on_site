@@ -3,3 +3,4 @@
 *.log
 .token
 humor
+local_config.py

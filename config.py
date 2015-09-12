@@ -1,9 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
-debug_mode = False
-testing_mode = False
 
+from local_config import *
+
+# local_config contain just
+# debug_mode = False
+# testing_mode = False
 assert testing_mode >= debug_mode
 
 # vk
