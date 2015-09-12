@@ -157,10 +157,7 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0,
         group_id_signed = group_id
     future = datetime.datetime.utcnow()
     publish_date = calendar.timegm(future.timetuple())
-    print("publish_date before" + str(publish_date))
     publish_date += delay_hours * 3600 + delay_minutes * 60
-    print("publish_date after" + str(publish_date))
-    print ("delay_minutes:" + str(delay_minutes))
     attachments = ""
     for pic_url in pictures_urls:
         pic_id = upload_picture_to_group_by_url(group_id, pic_url, token)
