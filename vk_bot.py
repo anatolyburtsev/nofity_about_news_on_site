@@ -158,7 +158,7 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0,
                                            ("attachments", attachments)], token)
         if not result:
             # if post for this time already exist, post after 2 minutes
-            create_post_advanced(group_id, text, token, pictures_urls, delay_hours, 2)
+            result = create_post_advanced(group_id, text, token, pictures_urls, delay_hours, 2)
         return result
 
 
