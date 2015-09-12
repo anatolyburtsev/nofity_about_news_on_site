@@ -78,9 +78,10 @@ def call_api(method, params, token):
     elif "error" in result_raw.keys():
         if result_raw["error"]["error_code"] == 9:
             return True
-        # Too many requests per second
-        elif result_raw["error"]["error_code"] == 6:
-            time.sleep(1)
+        # Too many requests per second - error 6
+        # captcha - error 14
+        elif result_raw["error"]["error_code"] == 6 or result_raw["error"]["error_code"] == 14:
+            time.sleep(2)
             logging.debug("Too many requests per second")
             return call_api(method, params_initial, token)
         else:
@@ -346,6 +347,49 @@ def save_schedule(schedule_dict, filename="schedule.json"):
         json.dump(schedule_dict, outfile)
 
 
+def get_anecdote():
+    return get_joke(1)
+
+
+def get_aphorism():
+    return get_joke(4)
+
+
+def get_quote():
+    return get_joke(5)
+
+
+def get_rouse():
+    #тост
+    return get_joke(6)
+
+
+def get_aphorism18():
+    return get_joke(14)
+
+
+def get_quote18():
+    return get_joke(15)
+
+
+def get_rouse18():
+    #тост
+    return get_joke(16)
+
+
+def get_anecdote18():
+    return get_joke(11)
+
+
+def get_joke(joke_type=1):
+    # http://www.rzhunemogu.ru/FAQ.aspx
+    url = "http://www.rzhunemogu.ru/RandJSON.aspx?CType=" + str(joke_type)
+    joke_request = requests.get(url)
+    joke = json.loads(joke_request.text)["content"]
+    print(joke)
+    return joke
+
+
 @timeout(5*60)
 def get_token(username, password, application_id, scopes):
     try:
@@ -371,6 +415,9 @@ user_id, token = get_token(config.vk_username, config.vk_password, config.applic
 
 elapsed = time.time() - start_time
 logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
+
+#print get_joke()
+
 
 #upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)
 #print postponed_posts(config.group_for_post_id, token)

@@ -87,7 +87,7 @@ def analyze_message(message_raw, token):
 
     message_to_chat = analyze_and_get_answer(message_raw["body"].lower().encode('utf-8'))
     if message_to_chat[0] == u"picture":
-        #send_message_to_chat(message_raw["chat_id"], message_to_chat[1], token)
+        send_message_to_chat(message_raw["chat_id"], message_to_chat[1], token)
         return send_random_picture_to_chat_from_dir(message_raw["chat_id"], config.humor_pics_dir, token)
     else:
         return send_message_to_chat(message_raw["chat_id"], message_to_chat[1], token)
