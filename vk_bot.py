@@ -133,12 +133,12 @@ def send_random_picture_to_chat_from_dir(chat_id, path_to_dir, token_inner=None)
     return send_picture_to_chat_from_hdd(chat_id, photo_path, token_inner)
 
 
-def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0):
+def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0, delay_minutes=0):
     if type(group_id) != str and group_id > 0:
         group_id_signed = "-"+str(group_id)
     else:
         group_id_signed = group_id
-    future = datetime.datetime.utcnow() + datetime.timedelta(hours=delay_hours)
+    future = datetime.datetime.utcnow() + datetime.timedelta(hours=delay_hours,minutes=delay_minutes)
     publish_date = calendar.timegm(future.timetuple())
     attachments = ""
     for pic_url in pictures_urls:
@@ -157,8 +157,8 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0)
                                            ("publish_date", publish_date),
                                            ("attachments", attachments)], token)
         if not result:
-            time.sleep(61)
-            create_post_advanced(group_id, text, token, pictures_urls, delay_hours)
+            # if post for this time already exist, post after 2 minutes
+            create_post_advanced(group_id, text, token, pictures_urls, delay_hours, 2)
         return result
 
 
