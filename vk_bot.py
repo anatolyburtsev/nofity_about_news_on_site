@@ -65,6 +65,7 @@ def timeout(seconds_before_timeout):
 
 
 def call_api(method, params, token):
+    params_initial = params
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s?%s" % (method, urlencode(params))
     try:
@@ -77,6 +78,10 @@ def call_api(method, params, token):
     elif "error" in result_raw.keys():
         if result_raw["error"]["error_code"] == 9:
             return True
+        # Too many requests per second
+        elif result_raw["error"]["error_code"] == 6:
+            time.sleep(1)
+            return call_api(method, params_initial, token)
         else:
             print(result_raw["error"]["error_msg"])
             logging.warning("error with vk api")
