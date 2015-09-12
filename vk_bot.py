@@ -385,8 +385,7 @@ def get_joke(joke_type=1):
     # http://www.rzhunemogu.ru/FAQ.aspx
     url = "http://www.rzhunemogu.ru/RandJSON.aspx?CType=" + str(joke_type)
     joke_request = requests.get(url)
-    joke = json.loads(joke_request.text)["content"]
-    print(joke)
+    joke = joke_request.text.replace('{"content":"', '')[:-1]
     return joke
 
 
@@ -415,8 +414,6 @@ user_id, token = get_token(config.vk_username, config.vk_password, config.applic
 
 elapsed = time.time() - start_time
 logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
-
-#print get_joke()
 
 
 #upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)

@@ -4,6 +4,7 @@
 __author__ = 'onotole'
 from vk_bot import MessageException, get_schedule, save_schedule, show_schedule, send_message_to_chat, call_api
 from vk_bot import token, send_random_picture_to_chat_from_dir
+import vk_bot
 import config
 import logging
 import time
@@ -19,7 +20,7 @@ def analyze_and_get_answer(message_raw):
     #     message[i] = message[i].encode('utf-8')
     # if config.bot_name not in message[0] and (config.bot_name in message_raw or u'бот' in message_raw):
     #     message_to_chat = u'Я - Валера'
-    if config.bot_name not in message[0]:
+    if not message[0].startswith(config.bot_name[:-1]):
         message_to_chat = ""
 
     elif len(message) < 2: # or message[1].lower() != u'расписание':
@@ -64,6 +65,23 @@ def analyze_and_get_answer(message_raw):
     elif len(message) > 2 and u'дел'.encode('utf-8') in message_raw and (u'что'.encode('utf-8') in message_raw or
     u'чо'.encode('utf-8') in message_raw):
         message_to_chat = u'На благо группы х*ярю!'
+    elif u'анекдот'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_anecdote()
+    elif u'анекдот'.encode('utf-8') in message_raw and u'18' in message_raw:
+        message_to_chat = vk_bot.get_anecdote18()
+    elif u'афоризм'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_aphorism()
+    elif u'афоризм'.encode('utf-8') in message_raw and u'18' in message_raw:
+        message_to_chat = vk_bot.get_aphorism18()
+    elif u'цитат'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_quote()
+    elif u'цитат'.encode('utf-8') in message_raw and u'18' in message_raw:
+        message_to_chat = vk_bot.get_quote18()
+    elif u'тост'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_rouse()
+    elif u'тост'.encode('utf-8') in message_raw and u'18' in message_raw:
+        message_to_chat = vk_bot.get_rouse18()
+
     else:
         raise MessageException
     logging.debug("finish analyze message in sec: " + str(time.time() - start_time))
