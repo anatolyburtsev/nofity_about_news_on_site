@@ -68,12 +68,13 @@ def call_api(method, params, token):
     except KeyError, e:
         if result_raw["error"]["error_code"] == 9:
             return True
-        elif result_raw["error"]["error_code"] == 214:
+        elif str(result_raw["error"]["error_code"]) == '214':
             #  a post is already scheduled for this time
             logging.info('a post is already scheduled for this time, sleep for a 1 minute')
             time.sleep(61)
             call_api(method, params, token)
         else:
+            print(result_raw["error"]["error_msg"])
             logging.warning("error with vk api")
             logging.warning(url)
             logging.warning(result_raw)
@@ -173,7 +174,7 @@ def create_post(text, label, pictures_urls=[]):
 
 
 def save_picture_by_url_to_hdd(picture_url):
-    logging.debug("saving picture by url: " + picture_url)
+    #logging.debug("saving picture by url: " + picture_url)
     picture_filename = picture_url.split('/')[-1]
     if not os.path.isdir(config.pic_dir):
         os.mkdir(config.pic_dir)
