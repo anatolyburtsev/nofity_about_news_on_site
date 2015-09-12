@@ -57,7 +57,7 @@ links = {"common": ["Новости".decode('utf-8'), "news/pc-browser/common"],
 bot_name = u'валера'.encode('utf-8')
 data_dir = "data"
 pic_dir = "pictures"
-humor_pics_dir = "/home/onotole/Yandex.Disk/humordirs/humor/"
+
 token_filename = ".token"
 logging_format = u'%(filename)s[line:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s'
 logging_level = logging.DEBUG

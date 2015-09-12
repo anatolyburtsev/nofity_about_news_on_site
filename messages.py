@@ -58,8 +58,12 @@ def analyze_and_get_answer(message_raw):
         message_to_chat = u'ПиуПиу'
     elif len(message) > 2 and u'как'.encode('utf-8') in message_raw and (u'дел'.encode('utf-8') in message_raw or u'жиз'.encode('utf-8') in message_raw):
         message_to_chat = u'Ваще огонь'
-    elif len(message) > 1 and (u'молод'.encode('utf-8') in message_raw or u'умни'.encode('utf-8') in message_raw):
+    elif len(message) > 1 and (u'молод'.encode('utf-8') in message_raw or u'умни'.encode('utf-8') in message_raw or
+    u'огонь'.encode('utf-8') in message_raw):
         message_to_chat = u"I'm sexy and I know it"
+    elif len(message) > 2 and u'дел'.encode('utf-8') in message_raw and (u'что'.encode('utf-8') in message_raw or
+    u'чо'.encode('utf-8') in message_raw):
+        message_to_chat = u'На благо группы х*ярю!'
     else:
         raise MessageException
     logging.debug("finish analyze message in sec: " + str(time.time() - start_time))
