@@ -86,11 +86,15 @@ def call_api(method, params, token):
     return result
 
 
-def call_api_post(method, params, token, timeout_between_posts=5):
+def call_api_post(method, params, token, timeout=5):
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s" % (method)
     params = urlencode(params)
-    result_raw = json.loads(urllib2.urlopen(url, params, timeout).read())
+    try:
+        result_raw = json.loads(urllib2.urlopen(url, params, timeout).read())
+    except urllib2.URLError:
+        logging.error('couldnt load site ' + url)
+        raise
     try:
         result = result_raw["response"]
     except KeyError:
@@ -100,7 +104,7 @@ def call_api_post(method, params, token, timeout_between_posts=5):
             # a post is already scheduled for this time
             logging.info('a post is already scheduled for this time, sleep for a 1 minute')
             time.sleep(61)
-            call_api_post(method, params, token, timeout_between_posts)
+            call_api_post(method, params, token, timeout)
         logging.info("error with vk api")
         logging.info(result_raw)
         raise
