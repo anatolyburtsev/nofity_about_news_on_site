@@ -126,7 +126,7 @@ def call_api_post(method, params, token, timeout=5):
     return result
 
 
-def send_message(user_id, text, token_inner=None):
+def send_message_to_user(user_id, text, token_inner=None):
     if not token_inner:
         token_inner = token
     return call_api("messages.send", [("user_id", str(user_id)), ("message", text)], token_inner)
@@ -144,6 +144,17 @@ def send_picture_to_chat_from_hdd(chat_id, picture_path, token_inner=None):
     chat_id = abs(int(chat_id))
     photo_id = upload_picture_to_chat_from_hdd(picture_path)
     return call_api("messages.send", [("chat_id", str(chat_id)), ("attachment", photo_id)], token_inner)
+
+
+def send_picture_to_user_from_hdd(user_id, picture_path, token_inner=None):
+    user_id = abs(int(user_id))
+    photo_id = upload_picture_to_chat_from_hdd(picture_path)
+    return call_api("messages.send", [("user_id", str(user_id)), ("attachment", photo_id)], token_inner)
+
+
+def send_random_picture_to_user_from_dir(user_id, path_to_dir, token_inner=None):
+    photo_path = choose_random_humor_from_hdd(config.humor_pics_dir)
+    return send_picture_to_chat_from_hdd(user_id, photo_path, token_inner)
 
 
 def send_random_picture_to_chat_from_dir(chat_id, path_to_dir, token_inner=None):
@@ -379,6 +390,14 @@ def get_rouse18():
 
 def get_anecdote18():
     return get_joke(11)
+
+
+def get_poem():
+    return get_joke(3)
+
+
+def get_poem18():
+    return get_joke(13)
 
 
 def get_joke(joke_type=1):
