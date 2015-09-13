@@ -1,0 +1,6 @@
+HOWTO install
+
+sudo -i
+apt-get install git python-pip libxml2 libxslt1.1 gcc python-dev python-lxml
+git clone https://github.com/anatolyburtsev/nofity_about_news_on_site.git
+pip install lxml beautifulsoup4 requests

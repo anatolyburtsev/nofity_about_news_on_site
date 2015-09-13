@@ -83,10 +83,8 @@ def analyze_and_get_answer(message_raw):
         message_to_chat = vk_bot.get_rouse18()
     elif u'тост'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_rouse()
-
     elif u'разберись'.encode('utf-8') in message_raw:
         message_to_chat = u'ну все, ты попал! Валера, вперед!'
-
 
     else:
         raise MessageException
