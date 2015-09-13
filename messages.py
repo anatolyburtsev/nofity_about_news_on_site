@@ -65,22 +65,23 @@ def analyze_and_get_answer(message_raw):
     elif len(message) > 2 and u'дел'.encode('utf-8') in message_raw and (u'что'.encode('utf-8') in message_raw or
     u'чо'.encode('utf-8') in message_raw):
         message_to_chat = u'На благо группы х*ярю!'
+    elif u'анекдот'.encode('utf-8') in message_raw and u'18'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_anecdote18()
     elif u'анекдот'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_anecdote()
-    elif u'анекдот'.encode('utf-8') in message_raw and u'18' in message_raw:
-        message_to_chat = vk_bot.get_anecdote18()
+    elif u'афоризм'.encode('utf-8') in message_raw and u'18'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_aphorism18()
     elif u'афоризм'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_aphorism()
-    elif u'афоризм'.encode('utf-8') in message_raw and u'18' in message_raw:
-        message_to_chat = vk_bot.get_aphorism18()
+    elif u'цитат'.encode('utf-8') in message_raw and u'18'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_quote18()
     elif u'цитат'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_quote()
-    elif u'цитат'.encode('utf-8') in message_raw and u'18' in message_raw:
-        message_to_chat = vk_bot.get_quote18()
+    elif u'тост'.encode('utf-8') in message_raw and u'18'.encode('utf-8') in message_raw:
+        message_to_chat = vk_bot.get_rouse18()
     elif u'тост'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_rouse()
-    elif u'тост'.encode('utf-8') in message_raw and u'18' in message_raw:
-        message_to_chat = vk_bot.get_rouse18()
+
 
     else:
         raise MessageException
