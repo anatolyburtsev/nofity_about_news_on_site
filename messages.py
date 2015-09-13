@@ -191,14 +191,14 @@ def check_messages():
         try:
             analyze_message(message, token, message["chat_id"])
         except MessageException:
-            message_to_chat = u"Я могу рассказать стишок:\n" +\
-                config.bot_name + u" стих \n" + \
-                u'или\n' + \
-                config.bot_name + u' стих 18+\n' + \
-                u" А еще могу рассказать анекдот, анекдот 18+,\n " + \
-                u" и даже тост и тост 18+, афоризм и афоризм 18+, цитаты и цитаты 18+\n" +\
-                u" и показать смешную картинку по запросу:\n" +\
-                config.bot_name + u" шуточку в студию"
+            message_to_chat = u"Я могу рассказать стишок:\n".encode('utf-8') +\
+                str(config.bot_name) + u" стих \n".encode('utf-8') + \
+                u'или\n'.encode('utf-8') + \
+                str(config.bot_name) + u' стих 18+\n'.encode('utf-8') + \
+                u" А еще могу рассказать анекдот, анекдот 18+,\n ".encode('utf-8') + \
+                u" и даже тост и тост 18+, афоризм и афоризм 18+, цитаты и цитаты 18+\n".encode('utf-8') +\
+                u" и показать смешную картинку по запросу:\n".encode('utf-8') +\
+                config.bot_name + u" шуточку в студию".encode('utf-8')
             message_to_chat = message_to_chat.encode('utf-8')
             send_message_to_chat(message["chat_id"], message_to_chat, token)
 
