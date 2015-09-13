@@ -154,7 +154,7 @@ def send_picture_to_user_from_hdd(user_id, picture_path, token_inner=None):
 
 def send_random_picture_to_user_from_dir(user_id, path_to_dir, token_inner=None):
     photo_path = choose_random_humor_from_hdd(config.humor_pics_dir)
-    return send_picture_to_chat_from_hdd(user_id, photo_path, token_inner)
+    return send_picture_to_user_from_hdd(user_id, photo_path, token_inner)
 
 
 def send_random_picture_to_chat_from_dir(chat_id, path_to_dir, token_inner=None):

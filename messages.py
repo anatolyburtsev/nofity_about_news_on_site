@@ -182,10 +182,7 @@ def check_messages():
             message_to_chat = u"я могу показать расписание:\n" +\
                               config.bot_name.decode('utf-8') + u" расписание показать \n\n" \
                               u"и установить нового ответственного:\n" +\
-                              config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика\n\n" + \
-                u" могу показать анекдот, анекдот 18+,\n " + \
-                u" а еще тост и тост 18+, афоризм и афоризм 18+, цитаты и цитаты 18+\n"
-
+                              config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика\n\n"
             message_to_chat = message_to_chat.encode('utf-8')
             send_message_to_chat(message["chat_id"], message_to_chat, token)
 
