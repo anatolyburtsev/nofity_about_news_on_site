@@ -129,7 +129,10 @@ def call_api_post(method, params, token, timeout=5):
 def send_message_to_user(user_id, text, token_inner=None):
     if not token_inner:
         token_inner = token
-    return call_api("messages.send", [("user_id", str(user_id)), ("message", text)], token_inner)
+    if not text:
+        return False
+    else:
+        return call_api("messages.send", [("user_id", str(user_id)), ("message", text)], token_inner)
 
 
 def send_message_to_chat(chat_id, text, token_inner=None):
