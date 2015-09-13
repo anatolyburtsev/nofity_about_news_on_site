@@ -23,7 +23,7 @@ def analyze_and_get_answer(message_raw):
     if not message[0].startswith(config.bot_name[:-1]):
         message_to_chat = ""
 
-    elif len(message) < 2: # or message[1].lower() != u'расписание':
+    elif len(message) < 2:
         raise MessageException
 
     # расписание
@@ -42,7 +42,7 @@ def analyze_and_get_answer(message_raw):
         current_schedule[message[3]] = [message[4], chapter]
         save_schedule(current_schedule)
         message_to_chat = show_schedule(get_schedule())
-    elif len(message) > 2 and message[2].lower() == u'показать'.encode('utf-8'):
+    elif len(message) > 2 and u'расписан'.encode('utf-8') in message_raw and u'пока'.encode('utf-8') in message_raw:
         message_to_chat = show_schedule(get_schedule())
     elif len(message) > 2 and message[2].lower() == u'очистить'.encode('utf-8'):
         save_schedule({})
@@ -53,14 +53,14 @@ def analyze_and_get_answer(message_raw):
         return ["picture", message_to_chat]
 
     #stupid part
-    elif len(message) > 2 and u'ты'.encode('utf-8') in message_raw and u'где'.encode('utf-8') in message_raw:
+    elif u'ты'.encode('utf-8') in message_raw and u'где'.encode('utf-8') in message_raw:
         message_to_chat = u'Валеры здесь нет!'
-    elif len(message) > 2 and u'твое'.encode('utf-8') in message_raw and u'время'.encode('utf-8') in message_raw:
+    elif u'твое'.encode('utf-8') in message_raw and u'время'.encode('utf-8') in message_raw:
         message_to_chat = u'ПиуПиу'
-    elif len(message) > 2 and u'как'.encode('utf-8') in message_raw and (u'дел'.encode('utf-8') in message_raw or u'жиз'.encode('utf-8') in message_raw):
+    elif u'как'.encode('utf-8') in message_raw and (u'дел'.encode('utf-8') in message_raw or u'жиз'.encode('utf-8') in message_raw):
         message_to_chat = u'Ваще огонь'
-    elif len(message) > 1 and (u'молод'.encode('utf-8') in message_raw or u'умни'.encode('utf-8') in message_raw or
-    u'огонь'.encode('utf-8') in message_raw):
+    elif u'молод'.encode('utf-8') in message_raw or u'умни'.encode('utf-8') in message_raw or \
+                    u'огонь'.encode('utf-8') in message_raw:
         message_to_chat = u"I'm sexy and I know it"
     elif len(message) > 2 and u'дел'.encode('utf-8') in message_raw and (u'что'.encode('utf-8') in message_raw or
     u'чо'.encode('utf-8') in message_raw):
@@ -81,6 +81,10 @@ def analyze_and_get_answer(message_raw):
         message_to_chat = vk_bot.get_rouse18()
     elif u'тост'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_rouse()
+    elif u'чо'.encode('utf-8') in message_raw and u'дела'.encode('utf-8') in message_raw:
+        message_to_chat = u'извини, хозяин, накосячил'
+    elif u'разберись'.encode('utf-8'):
+        message_to_chat = u'ну все, ты попал! Валера, вперед!'
 
 
     else:
