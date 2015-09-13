@@ -404,7 +404,7 @@ def get_joke(joke_type=1):
     # http://www.rzhunemogu.ru/FAQ.aspx
     url = "http://www.rzhunemogu.ru/RandJSON.aspx?CType=" + str(joke_type)
     joke_request = requests.get(url)
-    joke = joke_request.text.replace('{"content":"', '')[:-1]
+    joke = joke_request.text.replace('{"content":"', '')[:-2]
     return joke
 
 
