@@ -199,7 +199,6 @@ def check_messages():
                 u" и даже тост и тост 18+, афоризм и афоризм 18+, цитаты и цитаты 18+\n".encode('utf-8') +\
                 u" и показать смешную картинку по запросу:\n".encode('utf-8') +\
                 config.bot_name + u" шуточку в студию".encode('utf-8')
-            message_to_chat = message_to_chat.encode('utf-8')
             send_message_to_chat(message["chat_id"], message_to_chat, token)
 
     for message in unread_messages[2]:
@@ -214,7 +213,6 @@ def check_messages():
                 u" и даже тост и тост 18+, афоризм и афоризм 18+, цитаты и цитаты 18+\n".encode('utf-8') +\
                 u" и показать смешную картинку по запросу:\n".encode('utf-8') +\
                 config.bot_name + u" шуточку в студию".encode('utf-8')
-            message_to_chat = message_to_chat
             vk_bot.send_message_to_user(message["uid"], message_to_chat, token)
 
 
