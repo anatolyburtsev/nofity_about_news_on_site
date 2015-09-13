@@ -62,6 +62,8 @@ def analyze_and_get_answer(message_raw):
     elif u'молод'.encode('utf-8') in message_raw or u'умни'.encode('utf-8') in message_raw or \
                     u'огонь'.encode('utf-8') in message_raw:
         message_to_chat = u"I'm sexy and I know it"
+    elif u'чо'.encode('utf-8') in message_raw and u'дела'.encode('utf-8') in message_raw:
+        message_to_chat = u'извини, хозяин, накосячил'
     elif len(message) > 2 and u'дел'.encode('utf-8') in message_raw and (u'что'.encode('utf-8') in message_raw or
     u'чо'.encode('utf-8') in message_raw):
         message_to_chat = u'На благо группы х*ярю!'
@@ -81,8 +83,7 @@ def analyze_and_get_answer(message_raw):
         message_to_chat = vk_bot.get_rouse18()
     elif u'тост'.encode('utf-8') in message_raw:
         message_to_chat = vk_bot.get_rouse()
-    elif u'чо'.encode('utf-8') in message_raw and u'дела'.encode('utf-8') in message_raw:
-        message_to_chat = u'извини, хозяин, накосячил'
+
     elif u'разберись'.encode('utf-8'):
         message_to_chat = u'ну все, ты попал! Валера, вперед!'
 
