@@ -222,13 +222,13 @@ def notify(label, post):
 #print(get_post_text("http://wotblitz.ru/ru/news/pc-browser/specials/top-destroyers/"))
 #print(links["common"][1])
 #save_all_last_posts()
-
-logging.debug("Start")
-start_time = time.time()
-try:
-    check_for_new_posts()
-except WebSiteUnavailableException:
-    logging.debug("wotblitz site unavailable")
-finally:
-    elapsed = time.time() - start_time
-    logging.debug("Finish in " + str(elapsed) + " seconds")
+if __name__ == "__main__":
+    logging.debug("Start")
+    start_time = time.time()
+    try:
+        check_for_new_posts()
+    except WebSiteUnavailableException:
+        logging.debug("wotblitz site unavailable")
+    finally:
+        elapsed = time.time() - start_time
+        logging.debug("Finish in " + str(elapsed) + " seconds")

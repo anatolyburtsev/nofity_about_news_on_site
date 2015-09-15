@@ -1,9 +1,9 @@
 MAILTO=anatolyburtsev@yandex.ru
-path="/home/onotole/nofity_about_news_on_site"
-*/2	*	*	*	*	onotole	 cd $path; /usr/bin/flock -w 0 /tmp/.check_news python main.py
-* *   *   *   *	onotole cd $path; /usr/bin/flock -w 0 /tmp/.check_postponed_posts python check_postponed_posts.py
-*   *   *   *   *   onotole cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
-*   *   *   *   *   onotole sleep 15; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
-*   *   *   *   *   onotole sleep 30; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
-*   *   *   *   *   onotole sleep 45; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
-
+path="/root/nofity_about_news_on_site"
+*/2     *       *       *       *       root cd $path; /usr/bin/flock -w 0 /tmp/.check_news python main.py
+* *   *   *   * root cd $path; /usr/bin/flock -w 0 /tmp/.check_postponed_posts python check_postponed_posts.py
+*   *   *   *   *   root cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*   *   *   *   *   root sleep 15; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*   *   *   *   *   root sleep 30; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*   *   *   *   *   root sleep 45; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
+*/2     *       *       *       *       root cd $path; /usr/bin/flock -w 0 /tmp/.check_url python check_for_updates_on_site.py
