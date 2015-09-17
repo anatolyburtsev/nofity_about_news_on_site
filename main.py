@@ -66,7 +66,7 @@ def get_last_post(url):
 def get_post_text(url):
     page = load_helper(url)
     post_title_raw = page.find("meta", attrs={'property': 'og:title'})
-    post_title = post_title_raw.attrs["content"]
+    post_title = post_title_raw.attrs["content"].upper()
     post_text_raw = page.find("div", attrs={'class': 'b-content'})
     post_text_raw = str(post_text_raw).replace("<li>", config.li_replaces).replace("</li>", "")
 
