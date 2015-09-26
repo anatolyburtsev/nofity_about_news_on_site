@@ -179,7 +179,7 @@ def send_random_docs_to_user_from_hdd(user_id, token_inner, best=True, docs_numb
             os.remove(random_doc)
     docs_ids = docs_ids[:-1]
 
-    return call_api("messages.send", [("user_id", str(user_id)), ("attachment", docs_ids)], token_inner)
+    return call_api_post("messages.send", [("user_id", str(user_id)), ("attachment", docs_ids)], token_inner)
 
 
 def send_random_docs_to_chat_from_hdd(user_id, token_inner, best=True, docs_number=10):
@@ -194,7 +194,7 @@ def send_random_docs_to_chat_from_hdd(user_id, token_inner, best=True, docs_numb
         docs_ids = docs_ids + upload_doc_to_chat_from_hdd(random_doc) + ","
     docs_ids = docs_ids[:-1]
 
-    return call_api("messages.send", [("chat_id", str(user_id)), ("attachment", docs_ids)], token_inner)
+    return call_api_post("messages.send", [("chat_id", str(user_id)), ("attachment", docs_ids)], token_inner)
 
 
 def send_doc_to_user_from_hdd(user_id, docs_path, token_inner=None):
