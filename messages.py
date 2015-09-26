@@ -83,10 +83,15 @@ def analyze_and_get_answer(message_raw):
     elif u'шут'.encode('utf-8') in message_raw or u'еще'.encode('utf-8') in message[1] or u'да'.encode('utf-8') in message[1]:
         message_to_chat = u'еще?'.encode('utf-8')
         return ["picture", message_to_chat]
-
+    elif u'гиф'.encode('utf-8') in message_raw and u'лучши'.encode('utf-8') in message_raw or \
+                            u'gif'.encode('utf-8') in message[1] and u'best'.encode('utf-8') in message_raw:
+        message_to_chat = u'Вот ваши гифочки:'.encode('utf-8')
+        return ["gif_best", message_to_chat]
+    elif u'гиф'.encode('utf-8') in message[1] or u'gif'.encode('utf-8') in message[1]:
+        message_to_chat = u'Вот ваши гифочки:'.encode('utf-8')
+        return ["gif", message_to_chat]
     #stupid part
-    elif u'ты'.encode('utf-8') in message_raw and (u'где'.encode('utf-8') in message_raw or u'здесь'.encode('utf-8')):
-        message_to_chat = u'Валеры здесь нет!'
+
     elif u'твое'.encode('utf-8') in message_raw and u'время'.encode('utf-8') in message_raw:
         message_to_chat = u'ПиуПиу'
     elif u'как'.encode('utf-8') in message_raw and (u'дел'.encode('utf-8') in message_raw or u'жиз'.encode('utf-8') in message_raw):
@@ -121,7 +126,8 @@ def analyze_and_get_answer(message_raw):
         message_to_chat = vk_bot.get_poem()
     elif u'разберись'.encode('utf-8') in message_raw:
         message_to_chat = u'ну все, ты попал! Валера, вперед!'
-
+    elif u'ты'.encode('utf-8') in message_raw and (u'где'.encode('utf-8') in message_raw or u'здесь'.encode('utf-8')):
+        message_to_chat = u'Валеры здесь нет!'
     else:
         raise MessageException
     logging.debug("finish analyze message in sec: " + str(time.time() - start_time))
@@ -162,12 +168,20 @@ def analyze_message(message_raw, token, fromChat=False):
             message_to_chat = analyze_and_get_answer(message_raw["body"].lower().encode('utf-8'))
             if message_to_chat[0] == u"picture":
                 return send_random_picture_to_chat_from_dir(message_raw["chat_id"], config.humor_pics_dir, token)
+            elif message_to_chat[0] == u"gif":
+                return vk_bot.send_random_docs_to_chat_from_hdd(message_raw["chat_id"], token, False)
+            elif message_to_chat[0] == u"gif_best":
+                return vk_bot.send_random_docs_to_chat_from_hdd(message_raw["chat_id"], token, True)
             else:
                 return send_message_to_chat(message_raw["chat_id"], message_to_chat[1], token)
     else:
         message_to_chat = analyze_and_get_answer(message_raw["body"].lower().encode('utf-8'))
         if message_to_chat[0] == u"picture":
             return vk_bot.send_random_picture_to_user_from_dir(message_raw["uid"], config.humor_pics_dir, token)
+        elif message_to_chat[0] == u"gif":
+            return vk_bot.send_random_docs_to_user_from_hdd(message_raw["uid"], token, False)
+        elif message_to_chat[0] == u"gif_best":
+            return vk_bot.send_random_docs_to_user_from_hdd(message_raw["uid"], token, True)
         else:
             return vk_bot.send_message_to_user(message_raw["uid"], message_to_chat[1], token)
 

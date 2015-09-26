@@ -13,13 +13,13 @@ import datetime
 import logging
 import calendar
 import time
-import config
 import os
 import signal
 import random
 from pprint import pprint
 
 logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
+
 
 class MessageException(Exception):
     def __init__(self, value="Error in message"):
@@ -156,13 +156,68 @@ def send_picture_to_user_from_hdd(user_id, picture_path, token_inner=None):
 
 
 def send_random_picture_to_user_from_dir(user_id, path_to_dir, token_inner=None):
-    photo_path = choose_random_humor_from_hdd(config.humor_pics_dir)
+    photo_path = choose_random_file_from_dir_on_hdd(config.humor_pics_dir)
     return send_picture_to_user_from_hdd(user_id, photo_path, token_inner)
 
 
 def send_random_picture_to_chat_from_dir(chat_id, path_to_dir, token_inner=None):
-    photo_path = choose_random_humor_from_hdd(config.humor_pics_dir)
+    photo_path = choose_random_file_from_dir_on_hdd(config.humor_pics_dir)
     return send_picture_to_chat_from_hdd(chat_id, photo_path, token_inner)
+
+
+def send_random_docs_to_user_from_hdd(user_id, token_inner, best=True, docs_number=10):
+    user_id = abs(int(user_id))
+    if best:
+        docs_dir_path = config.gif_dir_best
+    else:
+        docs_dir_path = config.gif_dir_random
+    docs_ids = ""
+    for i in range(docs_number):
+        random_doc = choose_random_file_from_dir_on_hdd(docs_dir_path)
+        docs_ids = docs_ids + upload_doc_to_chat_from_hdd(random_doc) + ","
+        if user_id == config.user_for_gif and not best:
+            os.remove(random_doc)
+    docs_ids = docs_ids[:-1]
+
+    return call_api("messages.send", [("user_id", str(user_id)), ("attachment", docs_ids)], token_inner)
+
+
+def send_random_docs_to_chat_from_hdd(user_id, token_inner, best=True, docs_number=10):
+    user_id = abs(int(user_id))
+    if best:
+        docs_dir_path = config.gif_dir_best
+    else:
+        docs_dir_path = config.gif_dir_random
+    docs_ids = ""
+    for i in range(docs_number):
+        random_doc = choose_random_file_from_dir_on_hdd(docs_dir_path)
+        docs_ids = docs_ids + upload_doc_to_chat_from_hdd(random_doc) + ","
+    docs_ids = docs_ids[:-1]
+
+    return call_api("messages.send", [("chat_id", str(user_id)), ("attachment", docs_ids)], token_inner)
+
+
+def send_doc_to_user_from_hdd(user_id, docs_path, token_inner=None):
+    user_id = abs(int(user_id))
+    doc_id = upload_doc_to_chat_from_hdd(docs_path)
+    return call_api("messages.send", [("user_id", str(user_id)), ("attachment", doc_id)], token_inner)
+
+
+def upload_doc_to_chat_from_hdd(doc_path):
+    try:
+        doc_path = doc_path.encode('utf-8')
+    except UnicodeDecodeError:
+        pass
+    answer = call_api("docs.getUploadServer", [], token)
+    upload_url = answer["upload_url"]
+    files = {'file': open(doc_path, 'rb')}
+    r = requests.post(upload_url, files=files)
+    file_id = r.json()["file"]
+
+    result_uploading_doc = call_api("docs.save", [("file", file_id),
+                                                               ("title", doc_path),
+                                                               ("tags", "bot")], token)
+    return u"doc" + str(result_uploading_doc[0][u"owner_id"]) + "_" + str(result_uploading_doc[0][u"did"])
 
 
 def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0, delay_minutes=0):
@@ -285,7 +340,7 @@ def upload_picture_to_chat_from_hdd(picture_path):
     return result_uploading_photo[0]["id"]
 
 
-def choose_random_humor_from_hdd(path_to_dir):
+def choose_random_file_from_dir_on_hdd(path_to_dir):
     files = os.listdir(path_to_dir)
     return os.path.join(path_to_dir, files[random.randrange(len(files))])
 
@@ -437,7 +492,8 @@ user_id, token = get_token(config.vk_username, config.vk_password, config.applic
 elapsed = time.time() - start_time
 logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
 
-
+#send_doc_to_user_from_hdd(config.user_for_notification_id, os.path.join(config.gif_dir, "0_1b_25ed319_L.gif"), token)
+#send_random_docs_from_hdd(config.user_for_notification_id, token)
 #upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)
 #print postponed_posts(config.group_for_post_id, token)
 #print(check_postponed_posts_for_today(config.group_for_post_id, schedule.posts_time, token))

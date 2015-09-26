@@ -16,6 +16,7 @@ application_id = "4434173"
 
 # mine
 user_for_notification_id = "2249344"
+user_for_gif = "99605247"
 
 # XGAMING_conversation_id = 257742
 if testing_mode:
@@ -35,7 +36,7 @@ delay_before_publish = 1
 # за сколько времени напоминать
 time_before_remind = [120, 30]
 
-scopes = "messages,wall,photos"
+scopes = "messages,wall,photos,docs"
 li_replaces = "*** "
 
 
