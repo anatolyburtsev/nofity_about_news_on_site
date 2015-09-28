@@ -74,7 +74,7 @@ def timeout(seconds_before_timeout):
 
 
 def call_api(method, params, token, launch_counter=0):
-    logging.debug("launch call_api. method:" + method)
+    logging.debug("launch call_api. method:" + method + " params:" + str(params))
     if launch_counter == 5:
         logging.error("I had a recursion. method:" + method + " params:" + str(params))
         raise RecursionError
@@ -107,7 +107,7 @@ def call_api(method, params, token, launch_counter=0):
 
 
 def call_api_post(method, params, token, timeout=5, launch_counter=0):
-    logging.debug("launch call_api_post. method:" + method)
+    logging.debug("launch call_api_post. method:" + method + " params:" + str(params))
     if launch_counter == 5:
         logging.error("I had a recursion. method:" + method + " params:" + str(params))
         raise RecursionError
