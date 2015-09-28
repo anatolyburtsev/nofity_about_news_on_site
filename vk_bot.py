@@ -228,6 +228,7 @@ def upload_doc_to_chat_from_hdd(doc_path):
         doc_path = doc_path.encode('utf-8')
     except UnicodeDecodeError:
         pass
+    time.sleep(1)
     answer = call_api("docs.getUploadServer", [], token)
     upload_url = answer["upload_url"]
     files = {'file': open(doc_path, 'rb')}
