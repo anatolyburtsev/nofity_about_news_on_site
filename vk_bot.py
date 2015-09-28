@@ -94,7 +94,7 @@ def call_api(method, params, token, launch_counter=0):
         # Too many requests per second - error 6
         # captcha - error 14
         elif result_raw["error"]["error_code"] == 6 or result_raw["error"]["error_code"] == 14:
-            time.sleep(5)
+            time.sleep(5 + 5*launch_counter)
             logging.debug("Too many requests per second. method:" + method + " params:" + str(params))
             return call_api(method, params_initial, token, launch_counter+1)
         else:
@@ -128,7 +128,7 @@ def call_api_post(method, params, token, timeout=5, launch_counter=0):
             return True
 
         elif result_raw["error"]["error_code"] == 6:
-            time.sleep(5)
+            time.sleep(5 + 5*launch_counter)
             logging.debug("Too many requests per second. method:" + method)
             return call_api_post(method, params_initial, token, timeout, launch_counter+1)
 
