@@ -5,16 +5,18 @@ import os
 import os.path
 import config
 
-path_to_dir = '/Users/onotole/yandex.disk/humordirs/humor'
+path_to_dir = '/Users/onotole/yandex.disk/humordirs/gif'
 
 counter = 1
-for pic in os.listdir('/Users/onotole/yandex.disk/humordirs/humor'):
+for pic in os.listdir(path_to_dir):
     #print pic
     try:
         if u'jpg'.encode('utf-8') in pic.lower() or u'jpeg'.encode('utf-8') in pic.lower():
             os.rename(os.path.join(path_to_dir, pic), os.path.join(path_to_dir, str(counter) + u'.jpg'.encode('utf-8')))
         if u'png'.encode('utf-8') in pic.lower():
             os.rename(os.path.join(path_to_dir, pic), os.path.join(path_to_dir, str(counter) + u'.png'.encode('utf-8')))
+        if u'gif'.encode('utf-8') in pic.lower():
+            os.rename(os.path.join(path_to_dir, pic), os.path.join(path_to_dir, str(counter) + u'.gif'.encode('utf-8')))
         counter += 1
     except OSError:
         print u"shit happens with " + pic

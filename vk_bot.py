@@ -45,6 +45,15 @@ class TimeoutError(Exception):
         return repr(self.value)
 
 
+class RecursionError(Exception):
+    def __init__(self, value="Infinitive Recursion"):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+
 def timeout(seconds_before_timeout):
     def decorate(f):
         def handler(signum, frame):
@@ -64,8 +73,12 @@ def timeout(seconds_before_timeout):
     return decorate
 
 
-def call_api(method, params, token):
-    params_initial = params
+def call_api(method, params, token, launch_counter=0):
+    logging.debug("launch call_api. method:" + method)
+    if launch_counter == 5:
+        logging.error("I had a recursion. method:" + method + " params:" + str(params))
+        raise RecursionError
+    params_initial = params[:]
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s?%s" % (method, urlencode(params))
     try:
@@ -81,9 +94,9 @@ def call_api(method, params, token):
         # Too many requests per second - error 6
         # captcha - error 14
         elif result_raw["error"]["error_code"] == 6 or result_raw["error"]["error_code"] == 14:
-            time.sleep(2)
-            logging.debug("Too many requests per second")
-            return call_api(method, params_initial, token)
+            time.sleep(5)
+            logging.debug("Too many requests per second. method:" + method + " params:" + str(params))
+            return call_api(method, params_initial, token, launch_counter+1)
         else:
             print(result_raw["error"]["error_msg"])
             logging.warning("error with vk api")
@@ -93,8 +106,12 @@ def call_api(method, params, token):
     return result
 
 
-def call_api_post(method, params, token, timeout=5):
-    params_initial = params
+def call_api_post(method, params, token, timeout=5, launch_counter=0):
+    logging.debug("launch call_api_post. method:" + method)
+    if launch_counter == 5:
+        logging.error("I had a recursion. method:" + method + " params:" + str(params))
+        raise RecursionError
+    params_initial = params[:]
     params.append(("access_token", token))
     url = "https://api.vk.com/method/%s" % (method)
     params = urlencode(params)
@@ -111,9 +128,9 @@ def call_api_post(method, params, token, timeout=5):
             return True
 
         elif result_raw["error"]["error_code"] == 6:
-            time.sleep(1)
-            logging.debug("Too many requests per second")
-            return call_api_post(method, params_initial, token, timeout)
+            time.sleep(5)
+            logging.debug("Too many requests per second. method:" + method)
+            return call_api_post(method, params_initial, token, timeout, launch_counter+1)
 
         elif result_raw["error"]["error_code"] == 214:
             logging.debug("post already exist for this time")
@@ -173,10 +190,13 @@ def send_random_docs_to_user_from_hdd(user_id, token_inner, best=True, docs_numb
         docs_dir_path = config.gif_dir_random
     docs_ids = ""
     for i in range(docs_number):
+
         random_doc = choose_random_file_from_dir_on_hdd(docs_dir_path)
+        logging.debug("start loading gif: " + random_doc)
         docs_ids = docs_ids + upload_doc_to_chat_from_hdd(random_doc) + ","
         if user_id == config.user_for_gif and not best:
             os.remove(random_doc)
+        time.sleep(5)
     docs_ids = docs_ids[:-1]
 
     return call_api_post("messages.send", [("user_id", str(user_id)), ("attachment", docs_ids)], token_inner)
