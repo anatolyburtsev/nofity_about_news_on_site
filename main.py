@@ -8,6 +8,7 @@ import urllib2
 from socket import timeout
 from urlparse import urljoin
 import sys
+import re
 import os
 import os.path
 import time
@@ -130,9 +131,9 @@ def get_info_for_platoon_event(url_to_post):
     # entry453689 -> post_id_453689
     post_id = "post_id_"+post_id[5:]
     page_on_forum = load_helper(url_to_post_on_forum)
-    #print(url_to_post_on_forum)
+    print(url_to_post_on_forum)
     post_with_text = page_on_forum.find('div', attrs={'id': post_id})
-    title = post_with_text.find('p', attrs={'style': 'text-align:center;'}).get_text()
+    title = post_with_text.find('p', attrs={'style': re.compile('text-align:center;')}).get_text()
 
     pre_table_text = ""
     p_or_table = post_with_text.find_all(['p', 'table'])
@@ -149,12 +150,15 @@ def get_info_for_platoon_event(url_to_post):
     our_clan_mates = ""
     our_clan = load_clans_user()
 
-    for p in table_raw.find_all('p', attrs={'style': "background:none;", 'align': 'center'}):
+    print "TABLE_RAW:"
+    print table_raw
+    for p in table_raw.find_all('td', attrs={'style': re.compile("background:*none;")}):
+        print p
+        # if i % 5 == 0:
+        #     # номер игрока
+        #     table_text += p.get_text()
+        #     table_text += ". "
         if i % 5 == 0:
-            # номер игрока
-            table_text += p.get_text()
-            table_text += ". "
-        if i % 5 == 1:
             # ник игрока
             username = p.get_text()
             if username in our_clan:
@@ -162,13 +166,16 @@ def get_info_for_platoon_event(url_to_post):
                 our_clan_mates += '\n'
             table_text += username
             table_text += " - "
-        if i % 5 == 2:
+        if i % 5 == 1:
             # количество медалей
             table_text += p.get_text()
             table_text += u" медалей\n"
         i += 1
+        print table_text
+        print "END!!111111"
 
-    post_text =  title + "\n\n" + u"Поздравляем наших соклановцев:\n" + our_clan_mates + "\n\n" +\
+
+    post_text = title + "\n\n" + u"Поздравляем наших соклановцев:\n" + our_clan_mates + "\n\n" +\
                 pre_table_text + "\n" + table_text + "\n\n" + u"Новость на форуме: " + url_to_post_on_forum
     return [post_text, post_pic]
 
@@ -210,7 +217,7 @@ def notify(label, post):
     if "platoon_event" not in post:
         post_text, pictures_urls = get_post_text(url)
     else:
-        post_text, pictures_urls = get_info_for_platoon_event(url)
+        post_text, pictures_urls = get_post_text(url)#get_info_for_platoon_event(url)
     #print(post_text)
     assert type(pictures_urls) == list
     create_post(post_text.encode('utf-8'), label, pictures_urls)
