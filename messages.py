@@ -64,6 +64,13 @@ def analyze_and_get_answer_admin(message_raw):
         message_to_chat = u'На благо группы х*ярю!'
     elif u'разберись'.encode('utf-8') in message_raw:
         message_to_chat = u'ну все, ты попал! Валера, вперед!'
+    elif u'гиф'.encode('utf-8') in message_raw and u'лучши'.encode('utf-8') in message_raw or \
+                            u'gif'.encode('utf-8') in message[1] and u'best'.encode('utf-8') in message_raw:
+        message_to_chat = u'Вот ваши гифочки:'.encode('utf-8')
+        return ["gif_best", message_to_chat]
+    elif u'гиф'.encode('utf-8') in message[1] or u'gif'.encode('utf-8') in message[1]:
+        message_to_chat = u'Вот ваши гифочки:'.encode('utf-8')
+        return ["gif", message_to_chat]
 
     else:
         raise MessageException
