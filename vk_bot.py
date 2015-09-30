@@ -74,6 +74,7 @@ def timeout(seconds_before_timeout):
 
 
 def call_api(method, params, token, launch_counter=0):
+    time.sleep(0.35)
     logging.debug("launch call_api. method:" + method + " params:" + str(params))
     if launch_counter == 5:
         logging.error("I had a recursion. method:" + method + " params:" + str(params))
@@ -94,7 +95,7 @@ def call_api(method, params, token, launch_counter=0):
         # Too many requests per second - error 6
         # captcha - error 14
         elif result_raw["error"]["error_code"] == 6 or result_raw["error"]["error_code"] == 14:
-            time.sleep(5 + 5*launch_counter)
+            time.sleep(5 + 15*launch_counter)
             logging.debug("Too many requests per second. method:" + method + " params:" + str(params))
             return call_api(method, params_initial, token, launch_counter+1)
         else:
@@ -107,6 +108,7 @@ def call_api(method, params, token, launch_counter=0):
 
 
 def call_api_post(method, params, token, timeout=5, launch_counter=0):
+    time.sleep(0.35)
     logging.debug("launch call_api_post. method:" + method + " params:" + str(params))
     if launch_counter == 5:
         logging.error("I had a recursion. method:" + method + " params:" + str(params))
@@ -128,7 +130,7 @@ def call_api_post(method, params, token, timeout=5, launch_counter=0):
             return True
 
         elif result_raw["error"]["error_code"] == 6:
-            time.sleep(5 + 5*launch_counter)
+            time.sleep(5 + 10*launch_counter)
             logging.debug("Too many requests per second. method:" + method)
             return call_api_post(method, params_initial, token, timeout, launch_counter+1)
 
@@ -182,7 +184,7 @@ def send_random_picture_to_chat_from_dir(chat_id, path_to_dir, token_inner=None)
     return send_picture_to_chat_from_hdd(chat_id, photo_path, token_inner)
 
 
-def send_random_docs_to_user_from_hdd(user_id, token_inner, best=True, docs_number=10):
+def send_random_docs_to_user_from_hdd(user_id, token_inner, best=True, docs_number=1):
     user_id = abs(int(user_id))
     if best:
         docs_dir_path = config.gif_dir_best
@@ -196,13 +198,13 @@ def send_random_docs_to_user_from_hdd(user_id, token_inner, best=True, docs_numb
         docs_ids = docs_ids + upload_doc_to_chat_from_hdd(random_doc) + ","
         if user_id == config.user_for_gif and not best:
             os.remove(random_doc)
-        time.sleep(5)
+        #time.sleep(5)
     docs_ids = docs_ids[:-1]
 
     return call_api_post("messages.send", [("user_id", str(user_id)), ("attachment", docs_ids)], token_inner)
 
 
-def send_random_docs_to_chat_from_hdd(user_id, token_inner, best=True, docs_number=10):
+def send_random_docs_to_chat_from_hdd(user_id, token_inner, best=True, docs_number=1):
     user_id = abs(int(user_id))
     if best:
         docs_dir_path = config.gif_dir_best
@@ -228,7 +230,7 @@ def upload_doc_to_chat_from_hdd(doc_path):
         doc_path = doc_path.encode('utf-8')
     except UnicodeDecodeError:
         pass
-    time.sleep(1)
+    #time.sleep(1)
     answer = call_api("docs.getUploadServer", [], token)
     upload_url = answer["upload_url"]
     files = {'file': open(doc_path, 'rb')}
@@ -416,7 +418,7 @@ def show_schedule(schedule_dict):
     #for times, param in schedule_dict.items():
     for times in times_list:
         param = schedule_dict[times]
-        output_message = output_message + times + u" - товарищ: " + param[0] + \
+        output_message = output_message + times + u" - товарищ: " + param[0].title() + \
                          u", рубрика: " + unicode(param[1]) + "\n"
     #output_message = output_message.encode('utf-8')
     return output_message
