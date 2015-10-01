@@ -11,7 +11,7 @@ assert testing_mode >= debug_mode
 
 # vk
 vk_username = "79269900495"
-vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ2q"
+vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ2qt"
 
 application_id = "4434173"
 
@@ -54,11 +54,11 @@ applicationWGID = "77636487a299e95a72583de66dba7a63"
 #applicationWGID="77c7c785ff539689b53b8757553c852a"
 ru_prefix = "http://wotblitz.ru/ru"
 links = {"common": ["Новости".decode('utf-8'), "news/pc-browser/common"],
-         #"maintenance": ["Технические".decode('utf-8'), "news/pc-browser/maintenance"],
+         "maintenance": ["Технические".decode('utf-8'), "news/pc-browser/maintenance"],
          #"media": ["Медиа".decode('utf-8'), "news/pc-browser/media"],
          #"community": ["От игроков".decode('utf-8'), "news/pc-browser/community"],
-         #"guide": ["Руководства".decode('utf-8'), "news/pc-browser/guide"],
-         #"specials": ["Акции".decode('utf-8'), "news/pc-browser/specials"]
+         "guide": ["Руководства".decode('utf-8'), "news/pc-browser/guide"],
+         "specials": ["Акции".decode('utf-8'), "news/pc-browser/specials"]
          }
 
 
