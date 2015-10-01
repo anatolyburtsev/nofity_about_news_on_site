@@ -169,6 +169,10 @@ def analyze_message(message_raw, token, fromChat=False):
             message_to_chat = analyze_and_get_answer_admin(message_raw["body"].lower().encode('utf-8'))
             if message_to_chat[0] == u"picture":
                 return send_random_picture_to_chat_from_dir(message_raw["chat_id"], config.humor_pics_dir, token)
+            elif message_to_chat[0] == u"gif":
+                return vk_bot.send_random_docs_to_chat_from_hdd(message_raw["chat_id"], token, False)
+            elif message_to_chat[0] == u"gif_best":
+                return vk_bot.send_random_docs_to_chat_from_hdd(message_raw["chat_id"], token, True)
             else:
                 return send_message_to_chat(message_raw["chat_id"], message_to_chat[1], token)
         else:
