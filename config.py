@@ -23,7 +23,7 @@ email_from_addr = "bot_vk_valera@mail.ru"
 email_from_password = "iWYIOG53bsW3Nl9pcmcbKh3IZSwg4X"
 # email_from_addr = "onotolemobile@gmail.com"
 # email_from_password = "CRonT3517@@"
-email_to_addr = "anatolyburtsev@yandex.ru"
+email_to_addr = "XGaminG_gif@mail.ru"
 email_limit = 30*1024*1024 #30Mb
 
 # XGAMING_conversation_id = 257742
