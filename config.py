@@ -12,8 +12,6 @@ assert testing_mode >= debug_mode
 # vk
 vk_username = "79269900495"
 vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ2q"
-# vk_username = "anatolyburtsev@yandex.ru"
-# vk_password = "CRon3517"
 
 application_id = "4434173"
 
