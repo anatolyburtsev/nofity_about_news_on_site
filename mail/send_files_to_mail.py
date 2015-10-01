@@ -44,6 +44,7 @@ def send_files_to_email(fromaddr=config.email_from_addr,
         Encoders.encode_base64(att)
         att.add_header('Content-Disposition', 'attachment; filename="' + file_to_send +'"')
         msg.attach(att)
+        os.remove(file_to_send)
 
     # соединяемся с почтовым сервером и выполняем авторизацию
     server = SMTP('smtp.mail.ru', 25)
