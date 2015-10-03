@@ -59,7 +59,7 @@ def analyze_and_get_answer_admin(message_raw):
             message_to_chat = u'неверное имя пользователя'
         except vk_bot.CouldntBlockError:
             message_to_chat = u'не смог забанить админа или нехватило прав'
-        message_to_chat = username + u' успешно забанен.'
+        message_to_chat = username + u' успешно забанен. ' + comment
 
 
     #stupid part
