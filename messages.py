@@ -25,8 +25,8 @@ def analyze_and_get_answer_admin(message_raw):
     # расписание
     elif len(message) > 4 and message[2] == u'установить'.encode('utf-8') and len(message[3]) > 3 and message[4] and message[5]:
         # бот расписание установить 10:00 Ник рубрика
-        if len(message[3].split(':')) != 2:
-            message_to_chat = u'Ошибка во времени. Должно быть как-то так 10:00'
+        if len(message[3].split(':')) != 2 or len(message[3].split(':')[0]) != 2 or len(message[3].split(':')[1]) != 2:
+            message_to_chat = u'Ошибка во времени. Должно быть как-то так 10:00 или 08:30'
         else:
             hours, minutes = message[3].split(':')
             try:
@@ -46,6 +46,21 @@ def analyze_and_get_answer_admin(message_raw):
     elif len(message) > 2 and message[2].lower() == u'очистить'.encode('utf-8'):
         save_schedule({})
         message_to_chat = u'да, мой повелитель'
+
+    elif len(message) > 2 and message[1].lower() == u'забань'.encode('utf-8'):
+        if len(message) > 3:
+            comment = " ".join(message[3:])
+        else:
+            comment = ""
+        username = message[2]
+        try:
+            vk_bot.ban_user_in_group(username, config.group_for_post_id, token, comment)
+        except vk_bot.InvalidUserIDError:
+            message_to_chat = u'неверное имя пользователя'
+        except vk_bot.CouldntBlockError:
+            message_to_chat = u'не смог забанить админа или нехватило прав'
+        message_to_chat = username + u' успешно забанен.'
+
 
     #stupid part
     elif u'ты'.encode('utf-8') in message_raw and u'где'.encode('utf-8') in message_raw:
@@ -205,9 +220,11 @@ def check_messages():
             analyze_message(message, token, admin_chat_id)
         except MessageException:
             message_to_chat = u"я могу показать расписание:\n" +\
-                              config.bot_name.decode('utf-8') + u" расписание показать \n\n" \
+                              u" -> " + config.bot_name.decode('utf-8') + u" расписание показать \n\n" \
                               u"и установить нового ответственного:\n" +\
-                              config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика\n\n"
+                              u" -> " + config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика\n\n"\
+                              u"и забанить провинившегося подписчика:\n" +\
+                              u" -> " + config.bot_name.decode('utf-8') + u" забанить ссылка_на_вк комментарий\n\n"
             message_to_chat = message_to_chat.encode('utf-8')
             send_message_to_chat(message["chat_id"], message_to_chat, token)
 

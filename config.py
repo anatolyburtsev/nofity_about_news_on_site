@@ -44,7 +44,7 @@ delay_before_publish = 1
 # за сколько времени напоминать
 time_before_remind = [120, 30]
 
-scopes = "messages,wall,photos,docs"
+scopes = "messages,wall,photos,docs,groups"
 li_replaces = "*** "
 
 

@@ -45,13 +45,20 @@ class TimeoutError(Exception):
         return repr(self.value)
 
 
+class InvalidUserIDError(Exception):
+    pass
+
+
+class CouldntBlockError(Exception):
+    pass
+
+
 class RecursionError(Exception):
     def __init__(self, value="Infinitive Recursion"):
         self.value = value
 
     def __str__(self):
         return repr(self.value)
-
 
 
 def timeout(seconds_before_timeout):
@@ -241,6 +248,28 @@ def upload_doc_to_chat_from_hdd(doc_path):
                                                                ("title", doc_path),
                                                                ("tags", "bot")], token)
     return u"doc" + str(result_uploading_doc[0][u"owner_id"]) + "_" + str(result_uploading_doc[0][u"did"])
+
+
+def get_user_id(username, token_inner):
+    username = username.split('/')[-1]
+    try:
+        result = call_api("users.get", [("user_ids", username)], token_inner)
+    except APIErrorException:
+        raise InvalidUserIDError
+    real_user_id = result[0]["uid"]
+    return real_user_id
+
+
+def ban_user_in_group(username, group_id, token_inner, comment=""):
+    if type(username) == str:
+        username = get_user_id(username, token_inner)
+    group_id = abs(group_id)
+    try:
+        result = call_api("groups.banUser", [("group_id", group_id), ("user_id", username), ("comment", comment)],
+                    token_inner)
+    except APIErrorException:
+        raise CouldntBlockError
+    return result
 
 
 def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0, delay_minutes=0):
@@ -514,7 +543,6 @@ user_id, token = get_token(config.vk_username, config.vk_password, config.applic
 
 elapsed = time.time() - start_time
 logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
-
 #send_doc_to_user_from_hdd(config.user_for_notification_id, os.path.join(config.gif_dir, "0_1b_25ed319_L.gif"), token)
 #send_random_docs_from_hdd(config.user_for_notification_id, token)
 #upload_picture_to_group_by_url(config.group_for_post_id, "http://static-wbp-ru.gcdn.co/dcont/1.10/fb/image/relief.jpg", token)
