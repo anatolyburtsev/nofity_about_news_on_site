@@ -6,6 +6,7 @@ import json
 import urllib
 import urllib2
 import requests
+import math
 import schedule
 from urllib import urlencode
 import config
@@ -302,6 +303,74 @@ def create_post_advanced(group_id, text, token, pictures_urls=[], delay_hours=0,
         return result
 
 
+def get_group_id_by_url(url2group, token):
+    if type(url2group) == int:
+        return url2group
+    url2group = url2group.split('/')[-1]
+    group_info = call_api("groups.getById", [("group_id", url2group)], token)
+    group_id = group_info[0]["gid"]
+    return group_id
+
+
+def get_all_posts_from_group_by_url(url2group, processing_function, vars, stop_function, token):
+    return get_all_posts_from_group_by_id(get_group_id_by_url(url2group, token), processing_function, vars,
+                                          stop_function, token)
+
+
+def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_function, token):
+    group_id = -abs(int(group_id))
+    offset = 0
+    count = 100
+    posts_list = call_api("wall.get", [("owner_id", group_id), ("count", count), ("offset", offset)], token)
+    posts_count = posts_list[0]
+    posts_list = posts_list[1:]
+    posts_pages = posts_count / 100 + 1
+    for i in range(posts_pages):
+        for post in posts_list:
+            print post
+            if type(post) != dict:
+                continue
+            if not stop_function(post):
+                return vars
+            vars = processing_function(post, vars)
+        offset += 100
+        posts_list = call_api("wall.get", [("owner_id", group_id), ("count", count), ("offset", offset)], token)
+    return vars
+
+
+def processing_post_count_likes_and_repost(post, vars):
+    likes, reposts = vars
+    likes += post["likes"]["count"]
+    reposts += post["reposts"]["count"]
+    return [likes, reposts]
+
+
+def processing_post_return_true(blah):
+    return True
+
+
+def processing_post_stop_on_yesterdays_post(post):
+    # False - stop, True - continue
+    created_time = post["date"]
+    return created_time + config.secs_in_day > convert_today_hour_in_timestamp("00:00")
+
+
+def processing_post_eject_text_from_post(post):
+    try:
+        print post["text"]
+    except TypeError:
+        print "ERROR"
+        print post
+
+
+def processing_post_save_picture_from_post_if_text_empty(post, pic_dir=config.memes_dir):
+    if "text" in post.keys() and "attachments" in post.keys() and (not post["text"]) and (post["attachments"] != {}):
+        for attach in post["attachments"]:
+            if attach["type"] == "photo":
+                url2pic = attach["photo"]["src_big"]
+                save_picture_by_url_to_hdd(url2pic, pic_dir)
+
+
 def create_post(text, label, pictures_urls=[]):
     group_id = config.group_for_post_id
     token_inner = token
@@ -327,12 +396,12 @@ def create_post(text, label, pictures_urls=[]):
     return result
 
 
-def save_picture_by_url_to_hdd(picture_url):
+def save_picture_by_url_to_hdd(picture_url, pic_dir=config.pic_dir):
     #logging.debug("saving picture by url: " + picture_url)
     picture_filename = picture_url.split('/')[-1]
-    if not os.path.isdir(config.pic_dir):
-        os.mkdir(config.pic_dir)
-    picture_path = os.path.join(config.pic_dir, picture_filename)
+    if not os.path.isdir(pic_dir):
+        os.mkdir(pic_dir)
+    picture_path = os.path.join(pic_dir, picture_filename)
     urllib.urlretrieve(picture_url, picture_path)
     return picture_path
 

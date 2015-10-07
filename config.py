@@ -39,6 +39,7 @@ else:
 
 # картинки меньшего размера в байтах не будут загружаться в группу
 small_picture_limit = 50000
+secs_in_day = 24*60*60
 
 delay_before_publish = 1
 # за сколько времени напоминать
@@ -66,6 +67,7 @@ links = {"common": ["Новости".decode('utf-8'), "news/pc-browser/common"],
 bot_name = u'валера'.encode('utf-8')
 data_dir = "data"
 pic_dir = "pictures"
+memes_dir = "memes"
 
 token_filename = ".token"
 logging_format = u'%(filename)s[line:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s'
