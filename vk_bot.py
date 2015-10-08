@@ -327,7 +327,6 @@ def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_fun
     posts_pages = posts_count / 100 + 1
     for i in range(posts_pages):
         for post in posts_list:
-            print post
             if type(post) != dict:
                 continue
             if not stop_function(post):
@@ -339,10 +338,11 @@ def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_fun
 
 
 def processing_post_count_likes_and_repost(post, vars):
-    likes, reposts = vars
+    likes, reposts, comments = vars
     likes += post["likes"]["count"]
     reposts += post["reposts"]["count"]
-    return [likes, reposts]
+    comments += post["comments"]["count"]
+    return [likes, reposts, comments]
 
 
 def processing_post_return_true(blah):
