@@ -8,3 +8,4 @@ path="/root/nofity_about_news_on_site"
 *   *   *   *   *   root sleep 45; cd $path; /usr/bin/flock -w 0 /tmp/.check_messages python check_messages.py
 #*/2     *       *       *       *       root cd $path; /usr/bin/flock -w 0 /tmp/.check_url python check_for_updates_on_site.py
 0	8	*	*	*	root	cd $path; /usr/bin/flock -w 0 /tmp/.get_yest_summary python get_yesterday_summary.py
+10	8	*	*	*	root	cd $path; /usr/bin/flock -w 0 /tmp/.chck_pst_fr_whl_d python check_postsponed_posts_for_whole_day.py

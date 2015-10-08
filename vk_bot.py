@@ -501,6 +501,18 @@ def check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token):
     return posts_to_create
 
 
+def check_postponed_posts_for_whole_day(group_id, dict_of_posts, token):
+    existing_posts = set(postponed_posts(group_id, token))
+    now_timestamp = time.mktime(datetime.datetime.now().timetuple())
+    missed_posts_time = []
+
+    for param_for_post in dict_of_posts.items():
+        date_for_post = convert_today_hour_in_timestamp(param_for_post[0])
+        if date_for_post not in existing_posts and date_for_post > now_timestamp:
+            missed_posts_time.append(param_for_post[0])
+    return missed_posts_time
+
+
 def check_postponed_posts_for_today():
     group_id = config.group_for_post_id
     dict_of_posts = get_schedule()
