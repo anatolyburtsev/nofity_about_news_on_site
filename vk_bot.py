@@ -332,7 +332,6 @@ def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_fun
             if not stop_function(post):
                 continue
             vars = processing_function(post, vars)
-            print vars
         offset += 100
         posts_list = call_api("wall.get", [("owner_id", group_id), ("count", count), ("offset", offset)], token)
     return vars
