@@ -229,7 +229,9 @@ def check_messages():
                               u"и установить нового ответственного:\n" +\
                               u" -> " + config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика\n\n"\
                               u"и забанить провинившегося подписчика:\n" +\
-                              u" -> " + config.bot_name.decode('utf-8') + u" забань ссылка_на_вк комментарий\n\n"
+                              u" -> " + config.bot_name.decode('utf-8') + u" забань ссылка_на_вк комментарий\n\n"\
+                              u"и показать чьих постов на сегодня не хватает:\n" + \
+                              u" -> " + config.bot_name.decode('utf-8') + u" кто засранец?\n\n"
             message_to_chat = message_to_chat.encode('utf-8')
             send_message_to_chat(message["chat_id"], message_to_chat, token)
 
