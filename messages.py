@@ -8,6 +8,7 @@ import vk_bot
 import config
 import logging
 import time
+import check_postsponed_posts_for_whole_day
 admin_chat_id = config.chat_for_notification_id
 
 logging.basicConfig(format=config.logging_format, level=config.logging_level, filename=config.logging_filename)
@@ -61,6 +62,10 @@ def analyze_and_get_answer_admin(message_raw):
             message_to_chat = u'не смог забанить админа или нехватило прав'
         message_to_chat = username + u' успешно забанен. ' + comment
 
+    elif len(message) > 2 and u'кто'.encode('utf-8') in message_raw and u'засранец'.encode('utf-8'):
+        check_postsponed_posts_for_whole_day.check_missed_posts_for_the_rest_of_day(config.group_for_post_id,
+                                                                                    vk_bot.get_schedule(), token)
+        message_to_chat = ""
 
     #stupid part
     elif u'ты'.encode('utf-8') in message_raw and u'где'.encode('utf-8') in message_raw:
