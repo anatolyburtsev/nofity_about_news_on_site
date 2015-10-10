@@ -60,7 +60,7 @@ def analyze_and_get_answer_admin(message_raw):
             message_to_chat = u'неверное имя пользователя'
         except vk_bot.CouldntBlockError:
             message_to_chat = u'не смог забанить админа или нехватило прав'
-        message_to_chat = username + u' успешно забанен. ' + comment
+        message_to_chat = username + u' успешно забанен. '
 
     elif len(message) > 2 and u'кто'.encode('utf-8') in message_raw and u'засранец'.encode('utf-8'):
         check_postsponed_posts_for_whole_day.check_missed_posts_for_the_rest_of_day(config.group_for_post_id,
