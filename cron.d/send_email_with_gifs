@@ -1,3 +1,4 @@
 MAILTO=anatolyburtsev@yandex.ru
 path="/root/nofity_about_news_on_site"
 0	*		*		*		*		root	python ${path}/mail/send_files_to_mail.py
+
