@@ -11,7 +11,7 @@ assert testing_mode >= debug_mode
 
 # vk
 vk_username = "79269900495"
-vk_password = "sT2ANSbsMGnReQ3r2SvWaeGMtyz9QJ2qt"
+vk_password = "sT2ANSbsMGnRelr2SvWaeGMtyz9QJ2qt"
 
 application_id = "4434173"
 
@@ -21,8 +21,6 @@ user_for_gif = "99605247"
 
 email_from_addr = "bot_vk_valera@mail.ru"
 email_from_password = "iWYIOG53bsW3Nl9pcmcbKh3IZSwg4X"
-# email_from_addr = "onotolemobile@gmail.com"
-# email_from_password = "CRonT3517@@"
 email_to_addr = "XGaminG_gif@mail.ru"
 email_limit = 30*1024*1024 #30Mb
 
@@ -69,6 +67,7 @@ data_dir = "data"
 pic_dir = "pictures"
 memes_dir = "memes"
 
+group_members_filename = "group_members.txt"
 token_filename = ".token"
 logging_format = u'%(filename)s[line:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s'
 logging_level = logging.DEBUG

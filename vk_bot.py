@@ -153,6 +153,54 @@ def call_api_post(method, params, token, timeout=5, launch_counter=0):
     return result
 
 
+def get_users_list_group_members(group_id, token):
+    group_id = str(group_id).split('/')[-1]
+    users_list = []
+    users_on_1_page = 1000
+    response = call_api("groups.getMembers", [("group_id", group_id), ("count", users_on_1_page)], token)
+    users_count = int(response["count"])
+    users_list = response["users"]
+    users_pages_count = int(users_count) / users_on_1_page + 1
+    for i in range(1, users_pages_count):
+        offset = i * users_on_1_page
+        response = call_api("groups.getMembers", [("group_id", group_id), ("count", users_on_1_page),
+                                                  ("offset", offset)], token)
+        users_list += response["users"]
+    return users_list
+
+
+def save_list_to_filename(list, filename):
+    f = open(filename, "w")
+    for line in list:
+        f.write(str(line)+"\n")
+    f.close()
+
+
+def load_list_from_filename(filename):
+    f = open(filename, "r")
+    line = f.readline()
+    result_list = []
+    while line:
+        result_list.append(int(line[:-1]))
+        line = f.readline()
+    f.close()
+    return result_list
+
+
+def check_for_new_old_members_of_group(group_id, filename, token):
+    logging.debug("start comparing old and new members of group")
+    members_of_group = get_users_list_group_members(group_id, token)
+    if not os.path.exists(filename):
+        save_list_to_filename(members_of_group, filename)
+        return ""
+    yesterday_members_of_group = load_list_from_filename(filename)
+    new_member = len(set(members_of_group) - set(yesterday_members_of_group))
+    old_member = len( set(yesterday_members_of_group) - set(members_of_group))
+    message = "За вчерашний день пришло {} новых подписчиков и ушло {} негодяев".format(new_member, old_member)
+    save_list_to_filename(members_of_group, filename)
+    return message
+
+
 def send_message_to_user(user_id, text, token_inner=None):
     if not token_inner:
         token_inner = token
@@ -319,13 +367,14 @@ def get_all_posts_from_group_by_url(url2group, processing_function, vars, stop_f
 
 def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_function, token):
     group_id = -abs(int(group_id))
-    offset = 0
+    offset = 18700
     count = 100
     posts_list = call_api("wall.get", [("owner_id", group_id), ("count", count), ("offset", offset)], token)
     posts_count = posts_list[0]
     posts_list = posts_list[1:]
     posts_pages = posts_count / 100 + 1
     for i in range(posts_pages):
+        current_time = time.time()
         for post in posts_list:
             if type(post) != dict:
                 continue
@@ -334,6 +383,33 @@ def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_fun
             vars = processing_function(post, vars)
         offset += 100
         posts_list = call_api("wall.get", [("owner_id", group_id), ("count", count), ("offset", offset)], token)
+        #print ("100 post processed in " + str(time.time() - current_time) + " secs, current offset= " + str(offset))
+    return vars
+
+
+def module_save_picture_from_post(post, vars):
+    if "attachments" not in post:
+        return vars
+    attachments = post["attachments"]
+    links_to_photos = []
+    for attach in attachments:
+        link = ""
+        if "photo" in attach:
+            photo_attach = attach["photo"]
+            if "src_xxxbig" in photo_attach:
+                link = photo_attach["src_xxxbig"]
+            elif "src_xxbig" in photo_attach:
+                link = photo_attach["src_xxbig"]
+            elif "src_xbig" in photo_attach:
+                link = photo_attach["src_xbig"]
+            elif "src_big" in photo_attach:
+                link = photo_attach["src_big"]
+        if link:
+            try:
+                save_picture_by_url_to_hdd(link, vars[0])
+            except IOError:
+                print ("IOError, sleep 5 sec")
+                time.sleep(5)
     return vars
 
 

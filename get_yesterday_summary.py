@@ -5,7 +5,7 @@ __author__ = 'onotole'
 import vk_bot
 import config
 
-vk_group_url = "https://vk.com/wotblitz"
+#vk_group_url = "https://vk.com/wotblitz"
 token = vk_bot.token
 
 if __name__ == "__main__":
@@ -18,8 +18,10 @@ if __name__ == "__main__":
                                              [likes, reposts, comments],
                                              vk_bot.processing_post_stop_on_yesterdays_post,
                                              token)
+    text_about_new_members = vk_bot.check_for_new_old_members_of_group(config.group_for_post_url,
+                                                                       config.group_members_filename, token)
 
     text = "Товарищи! Хорошо вчера поработали: " + str(likes_for_yest) + " лайков, " + str(comments_for_yest) + \
-           " комментов и " + str(reposts_for_yest) + " репостов!"
+           " комментов и " + str(reposts_for_yest) + " репостов!\n" + text_about_new_members
 
     vk_bot.send_message_to_chat(config.chat_for_notification_id, text, token)
