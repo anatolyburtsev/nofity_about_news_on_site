@@ -367,7 +367,7 @@ def get_all_posts_from_group_by_url(url2group, processing_function, vars, stop_f
 
 def get_all_posts_from_group_by_id(group_id, processing_function, vars, stop_function, token):
     group_id = -abs(int(group_id))
-    offset = 18700
+    offset = 0
     count = 100
     posts_list = call_api("wall.get", [("owner_id", group_id), ("count", count), ("offset", offset)], token)
     posts_count = posts_list[0]
