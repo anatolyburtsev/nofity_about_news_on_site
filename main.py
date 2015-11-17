@@ -91,7 +91,10 @@ def get_post_text(url):
         raise
 
     post_pic_raw = page.find("div", attrs={'class': "news-picture"})
-    post_pic = post_pic_raw.attrs["style"].split("'")[1]
+    try:
+        post_pic = post_pic_raw.attrs["style"].split("'")[1]
+    except AttributeError:
+        post_pic = ""
     pictures_urls.append(post_pic)
 
     post = post_title + "\n\n" + post_text + "\n\n" + url
