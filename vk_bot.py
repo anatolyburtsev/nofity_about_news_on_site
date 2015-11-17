@@ -483,6 +483,8 @@ def save_picture_by_url_to_hdd(picture_url, pic_dir=config.pic_dir):
 
 
 def upload_picture_to_group_by_url(group_id, picture_url, token):
+    if not picture_url:
+        return None
     picture_path = save_picture_by_url_to_hdd(picture_url)
     return upload_picture_to_group_from_hdd(group_id, picture_path, token)
 
