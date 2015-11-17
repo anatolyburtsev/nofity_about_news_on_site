@@ -460,7 +460,7 @@ def create_post(text, label, pictures_urls=[]):
     else:
         post_id = result_creating["post_id"]
     message_for_notify = u"Новый пост: https://vk.com/wall-" + str(config.group_for_post_id) + "_" + \
-                         str(post_id) + u". Рубрика " + config.links[label][0] + " не забудь ХЭШТЭГ!!!11 с собакой!!1 @"
+                         str(post_id) + u". Рубрика " + config.links[label][0] + u" не забудь ХЭШТЭГ!!!11 с собакой!!1 @"
     message_for_notify = message_for_notify.encode('utf-8')
     if not config.debug_mode:
         result_sending_to_chat = send_message_to_chat(config.chat_for_notification_id, message_for_notify, token)
@@ -714,4 +714,3 @@ logging.debug("Finish checking token for vk in " + str(elapsed) + " seconds")
 #messages = get_messages(user_id, token)
 #send_message_to_conversation(user_id, token, "hello, world!")
 #create_post("PEWPEW")
-
