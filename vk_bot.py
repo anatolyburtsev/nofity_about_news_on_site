@@ -563,6 +563,15 @@ def convert_today_hour_in_timestamp(hour, minutes=None):
     return time.mktime(result_time.timetuple())
 
 
+def convert_tomorrow_hour_in_timestamp(hour, minutes=None):
+    # 10:00 today -> timestamp
+    if not minutes:
+        hour, minutes = hour.split(":")
+    today = datetime.datetime.now() + datetime.timedelta(days=1)
+    result_time = datetime.datetime(today.year, today.month, today.day, int(hour), int(minutes))
+    return time.mktime(result_time.timetuple())
+
+
 def check_postponed_posts_for_today_advanced(group_id, dict_of_posts, token):
     # dict = {"10:00": "user1", ... }
     posts_to_create = []
@@ -587,6 +596,17 @@ def check_postponed_posts_for_whole_day(group_id, dict_of_posts, token):
     for param_for_post in dict_of_posts.items():
         date_for_post = convert_today_hour_in_timestamp(param_for_post[0])
         if date_for_post not in existing_posts and date_for_post > now_timestamp:
+            missed_posts_time.append(param_for_post[0])
+    return missed_posts_time
+
+
+def check_postpones_posts_for_tomorrow(group_id, dict_of_posts, token):
+    existing_posts = set(postponed_posts(group_id, token))
+
+    missed_posts_time = []
+    for param_for_post in dict_of_posts.items():
+        date_for_post = convert_tomorrow_hour_in_timestamp(param_for_post[0])
+        if date_for_post not in existing_posts:
             missed_posts_time.append(param_for_post[0])
     return missed_posts_time
 

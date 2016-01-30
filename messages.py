@@ -72,8 +72,13 @@ def analyze_and_get_answer_admin(message_raw):
         except vk_bot.CouldntBlockError:
             message_to_chat = u'не смог забанить админа или нехватило прав'
         message_to_chat = username + u' успешно забанен. '
+    elif len(message) > 2 and u'кто'.encode('utf-8') in message_raw and u'засранец'.encode('utf-8') in message_raw\
+            and u'завтра'.encode('utf-8') in message_raw:
+        check_postsponed_posts_for_whole_day.check_missed_posts_for_tomorrow(config.group_for_post_id,
+                                                                                    vk_bot.get_schedule(), token)
+        message_to_chat = ""
 
-    elif len(message) > 2 and u'кто'.encode('utf-8') in message_raw and u'засранец'.encode('utf-8'):
+    elif len(message) > 2 and u'кто'.encode('utf-8') in message_raw and u'засранец'.encode('utf-8') in message_raw:
         check_postsponed_posts_for_whole_day.check_missed_posts_for_the_rest_of_day(config.group_for_post_id,
                                                                                     vk_bot.get_schedule(), token)
         message_to_chat = ""
@@ -243,8 +248,8 @@ def check_messages():
                               u" -> " + config.bot_name.decode('utf-8') + u" расписание удалить 10:00\n\n"\
                               u"и забанить провинившегося подписчика:\n" +\
                               u" -> " + config.bot_name.decode('utf-8') + u" забань ссылка_на_вк комментарий\n\n"\
-                              u"и показать чьих постов на сегодня не хватает:\n" + \
-                              u" -> " + config.bot_name.decode('utf-8') + u" кто засранец?\n\n"
+                              u"и показать чьих постов на сегодня(завтра) не хватает:\n" + \
+                              u" -> " + config.bot_name.decode('utf-8') + u" кто засранец (завтра)?\n\n"
             message_to_chat = message_to_chat.encode('utf-8')
             send_message_to_chat(message["chat_id"], message_to_chat, token)
 
