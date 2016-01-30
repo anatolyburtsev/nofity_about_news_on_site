@@ -42,6 +42,17 @@ def analyze_and_get_answer_admin(message_raw):
             current_schedule[message[3]] = [message[4], chapter]
             save_schedule(current_schedule)
             message_to_chat = show_schedule(get_schedule())
+    elif len(message) > 3 and message[2] == u'удалить'.encode('utf-8') and message[1] == u'расписание'.encode('utf-8'):
+        time_to_delete = message[3]
+        current_schedule = get_schedule()
+        if not current_schedule.has_key(time_to_delete):
+            message_to_chat = u'Такого времени в расписании не найдено. Сам посмотри: \n\n' + \
+                              show_schedule(get_schedule())
+        else:
+            del current_schedule[time_to_delete]
+            save_schedule(current_schedule)
+            message_to_chat = u'Жаль, что ушел... Такой герой был... (Успешно сохранено) \n' + \
+                              show_schedule(get_schedule())
     elif len(message) > 2 and u'расписан'.encode('utf-8') in message_raw and u'пока'.encode('utf-8') in message_raw:
         message_to_chat = show_schedule(get_schedule())
     elif len(message) > 2 and message[2].lower() == u'очистить'.encode('utf-8'):
@@ -228,6 +239,8 @@ def check_messages():
                               u" -> " + config.bot_name.decode('utf-8') + u" расписание показать \n\n" \
                               u"и установить нового ответственного:\n" +\
                               u" -> " + config.bot_name.decode('utf-8') + u" расписание установить 10:00 Имя Рубрика\n\n"\
+                              u"и удалить рубрику из расписания ответственного:\n" +\
+                              u" -> " + config.bot_name.decode('utf-8') + u" расписание удалить 10:00\n\n"\
                               u"и забанить провинившегося подписчика:\n" +\
                               u" -> " + config.bot_name.decode('utf-8') + u" забань ссылка_на_вк комментарий\n\n"\
                               u"и показать чьих постов на сегодня не хватает:\n" + \

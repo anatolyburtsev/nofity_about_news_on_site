@@ -603,7 +603,7 @@ def show_schedule(schedule_dict):
     # {"10:00" : [ник, рубрика]}
     times_list = sorted(schedule_dict.keys())
     output_message = u"Текущее расписание: \n"
-    #for times, param in schedule_dict.items():
+    # for times, param in schedule_dict.items():
     for times in times_list:
         param = schedule_dict[times]
         output_message = output_message + times + u" - товарищ: " + param[0].title() + \
